@@ -1,0 +1,3947 @@
+
+:i function $launch_pre_cas_menu$
+	:i $change_gamemode_singlesession$
+	:i $UnPauseSkaters$
+	:i $SpawnSkaterScript$$SkateshopCasIdle$$params$ = :s{$cam_pos$ = $general$:s}
+	:i $create_pre_cas_menu$
+	:i $cas_mod_made_by_kenny$
+:i endfunction
+:i function $create_pre_cas_menu$
+	:i $kill_start_key_binding$
+	:i $thugpro_menu_create$:s{
+		:i $menu_name$ = $precas$
+		:i $menu_title$ = %s(11,"\cbCAS Mod v2")
+		:i $menu_style$ = $MENU_STYLE_RIGHT$
+		:i $helper_text$ = $generic_helper_text$
+		:i $pad_back_script$ = $create_main_menu$
+		:i $pad_back_params$ = :s{:s}
+		:i $show_description_panel$
+		:i $boxed$
+	:i :s}
+	:i $make_thugpro_menu_item$:s{
+		:i $text$ = %s(16,"Reset Appearance")
+		:i $pad_choose_script$ = $pre_cas_menu_exit$
+		:i $pad_choose_params$ = :s{$new_menu_script$ = $confirm_reset_appearance$$came_from_main_menu$:s}
+	:i :s}
+	:i $make_thugpro_menu_item$:s{
+		:i $text$ = %s(12,"Edit Current")
+		:i $pad_choose_script$ = $pre_cas_menu_exit$
+		:i $id$ = $cas_edit_current_menu$
+		:i $pad_choose_params$ = :s{$new_menu_script$ = $skateshop_create_cas_menu$$came_from_main_menu$:s}
+	:i :s}
+	:i $make_thugpro_menu_item$:s{
+		:i $text$ = %s(11,"Load Skater")
+		:i $pad_choose_script$ = $pre_cas_menu_exit$
+		:i $pad_choose_params$ = :s{
+			:i $title$ = %s(11,"Load Skater")
+			:i $callback$ = $launch_load_cas_sequence$
+			:i $new_menu_script$ = $cas_overwrite_warning$
+		:i :s}
+	:i :s}
+	:i $make_thugpro_menu_item$:s{
+		:i $text$ = %s(11,"Save Skater")
+		:i $pad_choose_script$ = $pre_cas_menu_exit$
+		:i $pad_choose_params$ = :s{$new_menu_script$ = $launch_save_cas_sequence$:s}
+	:i :s}
+	:i $make_thugpro_menu_item$:s{
+		:i $text$ = %s(11,"Design Deck")
+		:i $pad_choose_script$ = $edit_skater_create_options_menu$
+		:i $pad_choose_params$ = :s{$options_array$ = $edit_skater_deck_options$$cam_pos$ = $board$:s}
+	:i :s}
+	:i $thugpro_menu_finalize$ isNull 
+	:i $GetSkaterId$
+	:i %GLOBAL%$objid$.$Obj_MoveToNode$$name$ = $trg_playerrestart$$Orient$$NoReset$
+:i endfunction
+:i function $jump_to_edit_skater$
+	:i $dialog_box_exit$
+	:i $create_edit_skater_menu$$came_from_main_menu$
+:i endfunction
+:i function $cas_overwrite_warning$$title$ = %sc(9,"Overwrite")$callback$ = $cas_reset_skater_and_goto_menu$
+	:i $create_snazzy_dialog_box$:s{
+		:i $title$ = %GLOBAL%$title$
+		:i $text$ = %sc(86,"Warning !\nAny unsaved changes to your current Game Progress will be lost.\nContinue ?")
+		:i $text_dims$ = %vec2(400.000000,0.000000)
+		:i $pad_back_script$ = $create_pre_cas_menu$
+		:i $buttons$ = :a{
+			:i :s{$font$ = $small$$text$ = %sc(2,"No")$pad_choose_script$ = $create_pre_cas_menu$:s}
+			:i :s{
+				:i $font$ = $small$$text$ = %sc(3,"Yes")
+				:i $pad_choose_script$ = $pre_cas_menu_exit$
+				:i $pad_choose_params$ = 
+				:i :s{
+					:i $new_menu_script$ = %GLOBAL%$callback$
+				:i :s}
+			:i :s}
+			:i :a}
+	:i :s}
+:i endfunction
+:i function $confirm_reset_appearance$
+	:i $create_snazzy_dialog_box$:s{
+		:i $title$ = %s(8,"WARNING!")
+		:i $text$ = %s(65,"You will lose all unsaved changes to your skater.\n Are you sure?")
+		:i $text_dims$ = %vec2(400.000000,0.000000)
+		:i $pad_back_script$ = $no_reest_appearance$
+		:i $no_bg$$keep_menu$
+		:i $buttons$ = :a{
+			:i :s{$text$ = %s(3,"Yes")$pad_choose_script$ = $yes_reset_appearance$:s}
+			:i :s{$text$ = %s(2,"No")$pad_choose_script$ = $no_reest_appearance$:s}
+			:i :a}
+	:i :s}
+:i endfunction
+:i function $yes_reset_appearance$
+	:i $dialog_box_exit$
+	:i $cas_reset_skater_and_goto_menu$
+:i endfunction
+:i function $no_reest_appearance$
+	:i $dialog_box_exit$
+	:i $create_pre_cas_menu$
+:i endfunction
+:i function $cas_reset_skater_and_goto_menu$
+	:i $GetCurrentSkaterProfileIndex$
+	:i $GetSkaterSex$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$
+	:i if  (%GLOBAL%$is_male$) 
+		:i %GLOBAL%$new_appearance$ =  ( ($custom_male_appearances$:a{%i(2,00000002):a}) ->$struct$) 
+	:i else 
+		:i %GLOBAL%$new_appearance$ =  ( ($custom_male_appearances$:a{%i(6,00000006):a}) ->$struct$) 
+		:i %GLOBAL%$female$ = %i(1,00000001)
+	:i endif
+	:i $ResetToDefaultProfile$$name$ = $custom$$partial$ = $appearance$
+	:i $load_pro_skater$$name$ = $custom$
+	:i $edit_skater_premade_skater_choose$:s{
+		:i $appearance$ = %GLOBAL%$new_appearance$
+		:i $female$ = %GLOBAL%$female$
+	:i :s}
+	:i $create_edit_skater_menu$$came_from_main_menu$
+:i endfunction
+:i function $pre_cas_menu_exit$
+	:i $dialog_box_exit$
+	:i $change$$entered_cas_from_main$ = %i(0,00000000)
+	:i if $ObjectExists$$id$ = $current_menu_anchor$
+		:i $DestroyScreenElement$$id$ = $current_menu_anchor$
+		:i $wait$%i(1,00000001)$frame$
+	:i endif
+	:i %GLOBAL%$new_menu_script$ isNull 
+:i endfunction
+:i $came_to_cas_menu_from_main_menu$ = %i(0,00000000)
+:i function $skateshop_create_cas_menu$
+	:i if $GotParam$$came_from_main_menu$
+		:i $change$$came_to_cas_menu_from_main_menu$ = %i(1,00000001)
+	:i else 
+		:i $change$$came_to_cas_menu_from_main_menu$ = %i(0,00000000)
+	:i endif
+	:i $launch_edit_skater_menu$ isNull 
+:i endfunction
+:i function $launch_edit_skater_menu$
+	:i if $ObjectExists$$id$ = $current_menu_anchor$
+		:i $DestroyScreenElement$$id$ = $current_menu_anchor$
+	:i endif
+	:i $GoalManager_HidePoints$
+	:i $GoalManager_HideGoalPoints$
+	:i $UnPauseSkaters$
+	:i $skater$.$Obj_GetID$
+	:i $create_edit_skater_menu$$animate$ isNull 
+:i endfunction
+:i function $create_edit_skater_menu$
+	:i if $ScreenElementExists$$id$ = $current_menu_anchor$
+		:i $DestroyScreenElement$$id$ = $current_menu_anchor$
+	:i endif
+	:i if $ScreenElementExists$$id$ = $edit_skater_options_vmenu$
+		:i $DestroyScreenElement$$id$ = $edit_skater_options_vmenu$
+	:i endif
+	:i if $ScreenElementExists$$id$ = $current_menu$
+		:i $DestroyScreenElement$$id$ = $current_menu$
+	:i endif
+	:i if $ScreenElementExists$$id$ = $bg_container$
+		:i $DestroyScreenElement$$id$ = $bg_container$
+	:i endif
+	:i $kill_start_key_binding$
+	:i $SpawnSkaterScript$$SkateshopCasIdle$
+	:i $thugpro_menu_create$:s{
+		:i $menu_name$ = $edit_skater$
+		:i $menu_title$ = %s(11,"\cbCAS Mod v2")
+		:i $menu_style$ = $MENU_STYLE_RIGHT$
+		:i $helper_text$ = $generic_helper_text_cas$
+		:i $show_description_panel$
+		:i $boxed$
+	:i :s}
+	:i $edit_skater_create_main_menu$ isNull 
+:i endfunction
+:i function $edit_skater_premade_skater_menu$
+	:i $thugpro_menu_create$:s{
+		:i $menu_name$ = $premade$
+		:i $menu_title$ = %s(16,"Pre-made skaters")
+		:i $menu_style$ = $MENU_STYLE_RIGHT$
+		:i $helper_text$ = $generic_helper_text_cas$
+		:i $pad_back_script$ = $pre_cas_menu_exit$
+		:i $pad_back_params$ = :s{$new_menu_script$ = $create_edit_skater_menu$:s}
+		:i $scrolling$
+		:i $boxed$
+	:i :s}
+	:i $SetScreenElementProps$:s{
+		:i $id$ = $premade_vmenu$
+		:i $event_handlers$ = :a{
+			:i :s{$pad_alt$$cas_skater_left$$params$ = :s{:s}:s}
+			:i :s{$pad_alt2$$cas_skater_right$$params$ = :s{:s}:s}
+			:i :a}
+	:i :s}
+	:i $AssignAlias$$id$ = $premade_vmenu$$alias$ = $current_menu$
+	:i $GetArraySize$$custom_male_appearances$
+	:i $index$ = %i(0,00000000)
+	:i while
+		
+		:i $make_thugpro_menu_item$:s{
+			:i $text$ =  ( ($custom_male_appearances$:a{%GLOBAL%$index$:a}) ->$name$) 
+			:i $pad_choose_script$ = $edit_skater_premade_skater_choose$
+			:i $pad_choose_params$ = :s{
+				:i $appearance$ =  ( ($custom_male_appearances$:a{%GLOBAL%$index$:a}) ->$struct$) 
+				:i $female$ =  ( ($custom_male_appearances$:a{%GLOBAL%$index$:a}) ->$female$) 
+				:i $voice$ =  ( ($custom_male_appearances$:a{%GLOBAL%$index$:a}) ->$voice$) 
+			:i :s}
+		:i :s}
+		:i $index$ =  (%GLOBAL%$index$ + %i(1,00000001)) 
+	:i loop_to %GLOBAL%$array_size$
+	:i $thugpro_menu_finalize$ isNull 
+:i endfunction
+:i function $edit_skater_premade_skater_choose$
+	:i $GetCurrentSkaterProfileIndex$
+	:i if NOT $GotParam$$female$
+		:i %GLOBAL%$is_male$ = %i(1,00000001)
+		:i $SetSkaterProfileProperty$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$$is_male$%i(1,00000001)
+	:i else 
+		:i %GLOBAL%$is_male$ = %i(0,00000000)
+		:i $SetSkaterProfileProperty$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$$is_male$%i(0,00000000)
+	:i endif
+	:i $SetPlayerAppearance$$appearance_structure$ = %GLOBAL%$appearance$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$
+	:i %GLOBAL%$index$ = %i(0,00000000)
+	:i $GetArraySize$$player_voices$
+	:i %GLOBAL%$voice_set$ = %i(0,00000000)
+	:i if $GotParam$$voice$
+		:i while
+			
+			:i if $ChecksumEquals$$a$ = %GLOBAL%$voice$$b$ =  ($player_voices$:a{%GLOBAL%$index$:a}->$id$) 
+				:i $SetSkaterProfileInfo$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$$params$ = :s{$voice$ =  ($player_voices$:a{%GLOBAL%$index$:a}->$id$) :s}
+				:i $change$$edit_skater_voice_index$ = %GLOBAL%$index$
+				:i %GLOBAL%$voice_set$ = %i(1,00000001)
+				:i continue
+				
+			:i endif
+			:i %GLOBAL%$index$ =  (%GLOBAL%$index$ + %i(1,00000001)) 
+		:i loop_to %GLOBAL%$array_size$
+	:i endif
+	:i if  (%GLOBAL%$voice_set$ = %i(0,00000000)) 
+		:i %GLOBAL%$index$ = %i(0,00000000)
+		:i while
+			
+			:i if  (%GLOBAL%$is_male$ =  ($player_voices$:a{%GLOBAL%$index$:a}->$is_male$) ) 
+				:i $SetSkaterProfileInfo$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$$params$ = :s{$voice$ =  ($player_voices$:a{%GLOBAL%$index$:a}->$id$) :s}
+				:i $change$$edit_skater_voice_index$ = %GLOBAL%$index$
+				:i continue
+				
+			:i endif
+			:i %GLOBAL%$index$ =  (%GLOBAL%$index$ + %i(1,00000001)) 
+		:i loop_to %GLOBAL%$array_size$
+	:i endif
+	:i $RefreshSkaterModel$$skater$ = %i(0,00000000)$profile$ = %GLOBAL%$CurrentSkaterProfileIndex$$no_board$ = $no_board$
+	:i $skater$.$TurnOffSpecialItem$
+:i endfunction
+:i function $edit_skater_create_main_menu$
+	:i if $LevelIs$$load_CAS$
+		:i $spawnscript$$eventually_setup_camera$
+	:i endif
+	:i $change$$current_cas_category$ = %i(0,00000000)
+	:i if $isTrue$$came_to_cas_menu_from_main_menu$
+		:i $callback_menu_script$ = $create_pre_cas_menu$
+	:i else 
+		:i $callback_menu_script$ = $launch_new_ss_menu$
+	:i endif
+	:i $SetScreenElementProps$:s{
+		:i $id$ = $edit_skater_vmenu$
+		:i $event_handlers$ = :a{
+			:i :s{$pad_back$$generic_menu_pad_back$$params$ = :s{$callback$ = %GLOBAL%$callback_menu_script$:s}:s}
+			:i :s{$pad_up$$generic_menu_up_or_down_sound$$params$ = :s{$up$:s}:s}
+			:i :s{$pad_down$$generic_menu_up_or_down_sound$$params$ = :s{$down$:s}:s}
+			:i :s{$pad_alt$$cas_skater_left$$params$ = :s{:s}:s}
+			:i :s{$pad_alt2$$cas_skater_right$$params$ = :s{:s}:s}
+			:i :a}
+		:i $replace_handlers$
+	:i :s}
+	:i $make_thugpro_menu_item$:s{
+		:i $text$ = %s(16,"Pre-made Skaters")
+		:i $pad_choose_script$ = $edit_skater_premade_skater_menu$
+	:i :s}
+	:i $make_thugpro_menu_item$:s{
+		:i $text$ = %s(11,"Information")
+		:i $pad_choose_script$ = $edit_skater_info_menu$
+	:i :s}
+	:i $make_thugpro_menu_item$:s{
+		:i $text$ = %s(12,"Head Options")
+		:i $pad_choose_script$ = $edit_skater_create_options_menu$
+		:i $pad_choose_params$ = :s{$options_array$ = $edit_skater_head_options$$cam_pos$ = $head$:s}
+	:i :s}
+	:i $make_thugpro_menu_item$:s{
+		:i $text$ = %s(13,"Torso Options")
+		:i $pad_choose_script$ = $edit_skater_create_options_menu$
+		:i $pad_choose_params$ = :s{$options_array$ = $edit_skater_torso_options$$cam_pos$ = $torso$$from_level_1$:s}
+	:i :s}
+	:i $make_thugpro_menu_item$:s{
+		:i $text$ = %s(11,"Leg Options")
+		:i $pad_choose_script$ = $edit_skater_create_options_menu$
+		:i $pad_choose_params$ = :s{$options_array$ = $edit_skater_leg_options$$cam_pos$ = $legs$:s}
+	:i :s}
+	:i $make_thugpro_menu_item$:s{
+		:i $text$ = %s(14,"Tattoo Options")
+		:i $pad_choose_script$ = $edit_skater_create_options_menu$
+		:i $pad_choose_params$ = :s{$options_array$ = $edit_skater_tattoo_options$$cam_pos$ = $general$:s}
+	:i :s}
+	:i $make_thugpro_menu_item$:s{
+		:i $text$ = %s(12,"Deck Options")
+		:i $pad_choose_script$ = $edit_skater_create_options_menu$
+		:i $pad_choose_params$ = :s{$options_array$ = $edit_skater_deck_options$$cam_pos$ = $board$:s}
+	:i :s}
+	:i $make_thugpro_menu_item$:s{
+		:i $text$ = %s(13,"Scale Options")
+		:i $pad_choose_script$ = $edit_skater_create_options_menu$
+		:i $pad_choose_params$ = :s{$options_array$ = $edit_skater_scaling_options$$cam_pos$ = $general$:s}
+	:i :s}
+	:i $make_thugpro_menu_item$:s{
+		:i $text$ = %s(15,"Graphic Options")
+		:i $pad_choose_script$ = $edit_skater_create_options_menu$
+		:i $pad_choose_params$ = :s{$options_array$ = $edit_skater_graphics$$cam_pos$ = $general$:s}
+	:i :s}
+	:i $make_thugpro_menu_item$:s{
+		:i $text$ = %s(12,"Face Mapping")
+		:i $pad_choose_script$ = $create_face_map_menu$
+		:i $pad_choose_params$ = :s{$pause_skater$$load_library$$cam_pos$ = $head$:s}
+	:i :s}
+	:i $thugpro_menu_finalize$ isNull 
+:i endfunction
+:i function $edit_skater_icon_menu_add_item$
+	:i $edit_skater_menu_add_item$ isNull 
+:i endfunction
+:i function $edit_skater_create_options_menu$
+	:i $thugpro_menu_create$:s{
+		:i $menu_name$ = $edit_skater_options$
+		:i $menu_title$ = %s(11,"\cbCAS Mod v2")
+		:i $menu_style$ = $MENU_STYLE_RIGHT$
+		:i $helper_text$ = $generic_helper_text_cas$
+		:i $pad_back_script$ = $pre_cas_menu_exit$
+		:i $pad_back_params$ = :s{$new_menu_script$ = $create_edit_skater_menu$:s}
+		:i $scrolling$
+		:i $boxed$
+	:i :s}
+	:i $SetScreenElementProps$:s{
+		:i $id$ = $current_menu$
+		:i $event_handlers$ = :a{
+			:i :s{$pad_alt$$cas_skater_left$$params$ = :s{:s}:s}
+			:i :s{$pad_alt2$$cas_skater_right$$params$ = :s{:s}:s}
+			:i :a}
+	:i :s}
+	:i $SpawnSkaterScript$$SkateshopCasIdle$$params$ = :s{$cam_pos$ = %GLOBAL%$cam_pos$:s}
+	:i if $GotParam$$options_array$
+		:i $GetCurrentSkaterProfileIndex$
+		:i $GetSkaterSex$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$
+		:i if $GetPlayerAppearancePart$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$$part$ = $board$
+			:i %GLOBAL%$current_board$ = %GLOBAL%$desc_id$
+			:i $RemoveParameter$$desc_id$
+		:i else 
+			:i %GLOBAL%$current_board$ = $None$
+		:i endif
+		:i $GetArraySize$%GLOBAL%$options_array$
+		:i %GLOBAL%$index$ = %i(0,00000000)
+		:i while
+			
+			:i %GLOBAL%$focusable$ = $focusable$
+			:i if $ArrayContains$:s{
+					:i $array$ = :a{$create_part_cas_scale_menu$;$create_part_cas_color_menu$;$create_part_cas_pos_menu$;$create_part_logo_menu$:a}
+					:i $contains$ =  ( (%GLOBAL%$options_array$:a{%GLOBAL%$index$:a}) ->$pad_choose_script$) 
+				:i :s}
+				:i if $StructureContains$$structure$ =  ( (%GLOBAL%$options_array$:a{%GLOBAL%$index$:a}) ->$pad_choose_params$) $parts$
+					:i if  (%GLOBAL%$is_male$) 
+						:i $tmppart$ =  ( ( ( (%GLOBAL%$options_array$:a{%GLOBAL%$index$:a}) ->$pad_choose_params$) ->$parts$) :a{%i(0,00000000):a}) 
+					:i else 
+						:i $tmppart$ =  ( ( ( (%GLOBAL%$options_array$:a{%GLOBAL%$index$:a}) ->$pad_choose_params$) ->$parts$) :a{%i(1,00000001):a}) 
+					:i endif
+					:i if $GetPlayerAppearancePart$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$$part$ = %GLOBAL%$tmppart$
+						:i if $ArrayContains$$array$ = :a{$None$;$Shirtless$;$BareFeet$;$Hands$:a}$contains$ = %GLOBAL%$desc_id$
+							:i %GLOBAL%$focusable$ = $not_focusable$
+						:i endif
+					:i else 
+						:i %GLOBAL%$focusable$ = $not_focusable$
+					:i endif
+				:i endif
+			:i endif
+			:i if $StructureContains$$structure$ =  (%GLOBAL%$options_array$:a{%GLOBAL%$index$:a}) $male_only$
+				:i if  (%GLOBAL%$is_male$) 
+					:i $make_thugpro_menu_item$:s{
+						:i $text$ =  ( (%GLOBAL%$options_array$:a{%GLOBAL%$index$:a}) ->$text$) 
+						:i $pad_choose_script$ =  ( (%GLOBAL%$options_array$:a{%GLOBAL%$index$:a}) ->$pad_choose_script$) 
+						:i $pad_choose_params$ =  ( (%GLOBAL%$options_array$:a{%GLOBAL%$index$:a}) ->$pad_choose_params$) 
+						:i %GLOBAL%$focusable$
+					:i :s}
+				:i endif
+			:i else 
+				:i if $StructureContains$$structure$ =  ( (%GLOBAL%$options_array$:a{%GLOBAL%$index$:a}) ->$pad_choose_params$) $allowed_items$
+					:i if NOT $ArrayContains$$array$ =  ( ( (%GLOBAL%$options_array$:a{%GLOBAL%$index$:a}) ->$pad_choose_params$) ->$allowed_items$) $contains$ = %GLOBAL%$current_board$
+						:i %GLOBAL%$focusable$ = $not_focusable$
+					:i endif
+				:i endif
+				:i $make_thugpro_menu_item$:s{
+					:i $text$ =  ( (%GLOBAL%$options_array$:a{%GLOBAL%$index$:a}) ->$text$) 
+					:i $pad_choose_script$ =  ( (%GLOBAL%$options_array$:a{%GLOBAL%$index$:a}) ->$pad_choose_script$) 
+					:i $pad_choose_params$ =  ( (%GLOBAL%$options_array$:a{%GLOBAL%$index$:a}) ->$pad_choose_params$) 
+					:i %GLOBAL%$focusable$
+				:i :s}
+			:i endif
+			:i %GLOBAL%$index$ =  (%GLOBAL%$index$ + %i(1,00000001)) 
+		:i loop_to %GLOBAL%$array_size$
+	:i endif
+	:i $thugpro_menu_create_remainder_items$
+	:i $thugpro_menu_finalize$ isNull 
+:i endfunction
+:i function $cas_set_part$
+	:i $cas_handle_disqualifications$ isNull 
+	:i $GetCurrentSkaterProfileIndex$
+	:i if  ( ($ChecksumEquals$$a$ = %GLOBAL%$part$$b$ = $ped_m_head$)  OR  ($ChecksumEquals$$a$ = %GLOBAL%$part$$b$ = $ped_f_head$) ) 
+		:i $GetSkaterSex$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$
+		:i if  (%GLOBAL%$is_male$) 
+			:i $hide_parts$ = :a{$skater_m_head$$hat$$skater_m_hat_hair$$skater_m_hair$$skater_m_jaw$:a}
+		:i else 
+			:i $hide_parts$ = :a{$skater_f_head$$hat$$skater_f_hat_hair$$skater_f_hair$:a}
+		:i endif
+		:i $GetArraySize$%GLOBAL%$hide_parts$
+		:i $index$ = %i(0,00000000)
+		:i while
+			
+			:i $EditPlayerAppearance$:s{
+				:i $profile$ = %GLOBAL%$CurrentSkaterProfileIndex$
+				:i $target$ = $ClearPart$$targetParams$ = :s{$part$ =  (%GLOBAL%$hide_parts$:a{%GLOBAL%$index$:a}) :s}
+			:i :s}
+			:i %GLOBAL%$index$ =  (%GLOBAL%$index$ + %i(1,00000001)) 
+		:i loop_to %GLOBAL%$array_size$
+		:i switch  (%GLOBAL%$structure$->$random_set$) 
+			:i case $light$
+				:i $skintone_desc$ = $skin_white$
+				:i endcase
+			case $dark$
+				:i $skintone_desc$ = $skin_dark$
+				:i endcase
+			case $tan$
+				:i $skintone_desc$ = $skin_tan$
+				:i endcase
+			default 
+				:i $skintone_desc$ = $skin_white$
+				:i end_switch
+		
+		:i $EditPlayerAppearance$:s{
+			:i $profile$ = %GLOBAL%$CurrentSkaterProfileIndex$
+			:i $target$ = $SetPart$$targetParams$ = :s{$part$ =  (%GLOBAL%$hide_parts$:a{%i(0,00000000):a}) $desc_id$ = %GLOBAL%$skintone_desc$:s}
+		:i :s}
+	:i endif
+	:i if  ( ($ChecksumEquals$$a$ = %GLOBAL%$part$$b$ = $skater_m_head$)  OR  ($ChecksumEquals$$a$ = %GLOBAL%$part$$b$ = $skater_f_head$) ) 
+		:i $GetSkaterSex$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$
+		:i if  (%GLOBAL%$is_male$) 
+			:i $hide_part$ = $ped_m_head$
+		:i else 
+			:i $hide_part$ = $ped_f_head$
+		:i endif
+		:i $clear_face_texture_from_profile$
+		:i $EditPlayerAppearance$$profile$ = %GLOBAL%$CurrentSkaterProfileIndex$$target$ = $ClearPart$$targetParams$ = :s{$part$ = $headtop_bone_group$:s}
+		:i $EditPlayerAppearance$$profile$ = %GLOBAL%$CurrentSkaterProfileIndex$$target$ = $ClearPart$$targetParams$ = :s{$part$ = $head_bone_group$:s}
+		:i $EditPlayerAppearance$$profile$ = %GLOBAL%$CurrentSkaterProfileIndex$$target$ = $ClearPart$$targetParams$ = :s{$part$ = $nose_bone_group$:s}
+		:i $EditPlayerAppearance$$profile$ = %GLOBAL%$CurrentSkaterProfileIndex$$target$ = $ClearPart$$targetParams$ = :s{$part$ = $Jaw_bone_group$:s}
+		:i $EditPlayerAppearance$:s{
+			:i $profile$ = %GLOBAL%$CurrentSkaterProfileIndex$
+			:i $target$ = $ClearPart$$targetParams$ = :s{$part$ = %GLOBAL%$hide_part$:s}
+		:i :s}
+	:i endif
+	:i $EditPlayerAppearance$:s{
+		:i $profile$ = %GLOBAL%$CurrentSkaterProfileIndex$
+		:i $target$ = $SetPart$$targetParams$ = :s{$part$ = %GLOBAL%$part$$desc_id$ = %GLOBAL%$desc_id$:s}
+	:i :s}
+	:i if $ArrayContains$$array$ = $__cas_refresh_skater_parts$$contains$ = %GLOBAL%$part$
+		:i $RefreshSkaterModel$$profile$ = %GLOBAL%$CurrentSkaterProfileIndex$$skater$ = %i(0,00000000)
+	:i else 
+		:i $RefreshSkaterModel$$profile$ = %GLOBAL%$CurrentSkaterProfileIndex$$skater$ = %i(0,00000000)$no_board$ = $no_board$
+	:i endif
+	:i $skater$.$TurnOffSpecialItem$
+	:i if $ChecksumEquals$$a$ = %GLOBAL%$desc_id$$b$ = $hover$
+		:i $change$$hoverboard_mode$ = %i(1,00000001)
+	:i else 
+		:i if $isTrue$$hoverboard_mode$
+			:i $change$$hoverboard_mode$ = %i(0,00000000)
+		:i endif
+	:i endif
+:i endfunction
+:i function $create_part_logo_menu$
+	:i $create_part_cas_menu$ isNull 
+:i endfunction
+:i function $create_part_cas_menu$:s{
+		:i $title$ = %s(11,"Edit Skater")
+	:i :s}
+	:i $GetCurrentSkaterProfileIndex$
+	:i $GetSkaterSex$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$
+	:i if $GotParam$$logo_parts$
+		:i if  (%GLOBAL%$is_male$) 
+			:i $array$ =  (%GLOBAL%$logo_parts$:a{%i(0,00000000):a}) 
+		:i else 
+			:i $array$ =  (%GLOBAL%$logo_parts$:a{%i(1,00000001):a}) 
+		:i endif
+	:i else 
+		:i if  (%GLOBAL%$is_male$) 
+			:i $array$ =  (%GLOBAL%$parts$:a{%i(0,00000000):a}) 
+		:i else 
+			:i $array$ =  (%GLOBAL%$parts$:a{%i(1,00000001):a}) 
+		:i endif
+	:i endif
+	:i $ClearExceptions$
+	:i $thugpro_menu_create$:s{
+		:i $menu_name$ = $edit_skater_part$
+		:i $menu_title$ = %GLOBAL%$title$
+		:i $menu_style$ = $MENU_STYLE_RIGHT$
+		:i $helper_text$ = $generic_helper_text_cas$
+		:i $pad_back_script$ = %GLOBAL%$callback$
+		:i $pad_back_params$ = %GLOBAL%$callback_params$
+		:i $scrolling$
+		:i $boxed$
+	:i :s}
+	:i $SetScreenElementProps$:s{
+		:i $id$ = $current_menu$
+		:i $event_handlers$ = :a{
+			:i :s{$pad_alt$$cas_skater_left$$params$ = :s{:s}:s}
+			:i :s{$pad_alt2$$cas_skater_right$$params$ = :s{:s}:s}
+			:i :a}
+	:i :s}
+	:i if $GotParam$$cam$
+		:i $SpawnSkaterScript$$SkateshopCasIdle$$params$ = :s{$cam_pos$ = %GLOBAL%$cam$:s}
+	:i endif
+	:i if  (%GLOBAL%$is_male$) 
+		:i if $ChecksumEquals$$a$ = %GLOBAL%$array$$b$ = $ped_m_head$
+			:i $make_thugpro_menu_item$:s{
+				:i $text$ = %s(7,"Default")
+				:i $id$ = $default_skater_head$
+				:i $pad_choose_script$ = $cas_set_part$
+				:i $pad_choose_params$ = :s{$desc_id$ = $Light Skin 1$$part$ = $skater_m_head$:s}
+				:i $pad_back_scripts$ = %GLOBAL%$callback$
+				:i $pad_back_params$ = %GLOBAL%$callback_params$
+			:i :s}
+		:i endif
+	:i else 
+		:i if $ChecksumEquals$$a$ = %GLOBAL%$array$$b$ = $ped_f_head$
+			:i $make_thugpro_menu_item$:s{
+				:i $text$ = %s(7,"Default")
+				:i $id$ = $default_skater_head$
+				:i $pad_choose_script$ = $cas_set_part$
+				:i $pad_choose_params$ = :s{$desc_id$ = $Light Head 1$$part$ = $skater_f_head$:s}
+				:i $pad_back_scripts$ = %GLOBAL%$callback$
+				:i $pad_back_params$ = %GLOBAL%$callback_params$
+			:i :s}
+		:i endif
+	:i endif
+	:i $GetArraySize$%GLOBAL%$array$
+	:i %GLOBAL%$index$ = %i(0,00000000)
+	:i while
+		
+		:i if $GotParam$$desc_prefix$
+			:i $FormatText$$textname$ = $frontend_desc$%s(5,"%a %i")$a$ = %GLOBAL%$desc_prefix$$i$ = %GLOBAL%$index$
+			:i $FormatText$$ChecksumName$ = $desc_id$%s(4,"%a%i")$a$ = %GLOBAL%$desc_prefix$$i$ = %GLOBAL%$index$
+		:i else 
+			:i %GLOBAL%$frontend_desc$ =  ( (%GLOBAL%$array$:a{%GLOBAL%$index$:a}) ->$frontend_desc$) 
+			:i %GLOBAL%$desc_id$ =  ( (%GLOBAL%$array$:a{%GLOBAL%$index$:a}) ->$desc_id$) 
+		:i endif
+		:i if NOT $StructureContains$$structure$ =  (%GLOBAL%$array$:a{%GLOBAL%$index$:a}) $hidden$
+			:i $make_thugpro_menu_item$:s{
+				:i $text$ = %GLOBAL%$frontend_desc$
+				:i $id$ = %GLOBAL%$desc_id$
+				:i $pad_choose_script$ = $cas_set_part$
+				:i $pad_choose_params$ = :s{$structure$ =  (%GLOBAL%$array$:a{%GLOBAL%$index$:a}) $desc_id$ =  ( (%GLOBAL%$array$:a{%GLOBAL%$index$:a}) ->$desc_id$) $part$ = %GLOBAL%$array$:s}
+				:i $pad_back_scripts$ = %GLOBAL%$callback$
+				:i $pad_back_params$ = %GLOBAL%$callback_params$
+			:i :s}
+		:i endif
+		:i %GLOBAL%$index$ =  (%GLOBAL%$index$ + %i(1,00000001)) 
+	:i loop_to %GLOBAL%$array_size$
+	:i $thugpro_menu_create_remainder_items$
+	:i $thugpro_menu_finalize$ isNull 
+:i endfunction
+:i function $create_part_cas_color_menu$:s{
+		:i $title$ = %s(5,"Color")
+		:i $helper_text$ = $generic_helper_text$
+	:i :s}
+	:i $thugpro_menu_create$:s{
+		:i $menu_name$ = $edit_skater_color$
+		:i $menu_title$ = %GLOBAL%$title$
+		:i $menu_style$ = $MENU_STYLE_RIGHT$
+		:i $pad_back_script$ = %GLOBAL%$callback$
+		:i $pad_back_params$ = %GLOBAL%$callback_params$
+		:i $helper_text$ = %GLOBAL%$helper_text$
+		:i $wide_extra_text$
+		:i $boxed$
+	:i :s}
+	:i $SetScreenElementProps$:s{
+		:i $id$ = $current_menu$
+		:i $event_handlers$ = :a{
+			:i :s{$pad_alt$$cas_skater_left$$params$ = :s{:s}:s}
+			:i :s{$pad_alt2$$cas_skater_right$$params$ = :s{:s}:s}
+			:i :a}
+	:i :s}
+	:i $GetCurrentSkaterProfileIndex$
+	:i $GetSkaterSex$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$
+	:i if $GotParam$$color_parts$
+		:i if  (%GLOBAL%$is_male$) 
+			:i $part$ =  (%GLOBAL%$color_parts$:a{%i(0,00000000):a}) 
+		:i else 
+			:i $part$ =  (%GLOBAL%$color_parts$:a{%i(1,00000001):a}) 
+		:i endif
+	:i else 
+		:i if  (%GLOBAL%$is_male$) 
+			:i $part$ =  (%GLOBAL%$parts$:a{%i(0,00000000):a}) 
+		:i else 
+			:i $part$ =  (%GLOBAL%$parts$:a{%i(1,00000001):a}) 
+		:i endif
+	:i endif
+	:i if $GotParam$$cam$
+		:i $SpawnSkaterScript$$SkateshopCasIdle$$params$ = :s{$cam_pos$ = %GLOBAL%$cam$:s}
+	:i endif
+	:i $thugpro_color_menu_add_options_to_menu$$part$ = %GLOBAL%$part$
+	:i $thugpro_menu_finalize$ isNull 
+	:i $__thugpro_color_menu_refresh$$part$ = %GLOBAL%$part$
+:i endfunction
+:i function $create_part_cas_pos_menu$:s{
+		:i $title$ = %s(14,"Adjust texture")
+	:i :s}
+	:i $thugpro_menu_create$:s{
+		:i $menu_name$ = $edit_skater_adjust$
+		:i $menu_title$ = %GLOBAL%$title$
+		:i $menu_style$ = $MENU_STYLE_RIGHT$
+		:i $helper_text$ = $generic_helper_text$
+		:i $pad_back_script$ = %GLOBAL%$callback$
+		:i $pad_back_params$ = %GLOBAL%$callback_params$
+		:i $boxed$
+	:i :s}
+	:i $GetCurrentSkaterProfileIndex$
+	:i $GetSkaterSex$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$
+	:i if  (%GLOBAL%$is_male$) 
+		:i $part$ =  (%GLOBAL%$parts$:a{%i(0,00000000):a}) 
+	:i else 
+		:i $part$ =  (%GLOBAL%$parts$:a{%i(1,00000001):a}) 
+	:i endif
+	:i if $GotParam$$cam$
+		:i $SpawnSkaterScript$$SkateshopCasIdle$$params$ = :s{$cam_pos$ = %GLOBAL%$cam$:s}
+	:i endif
+	:i $SetScreenElementProps$:s{
+		:i $id$ = $current_menu$
+		:i $event_handlers$ = :a{
+			:i :s{$pad_alt$$cas_skater_left$$params$ = :s{:s}:s}
+			:i :s{$pad_alt2$$cas_skater_right$$params$ = :s{:s}:s}
+			:i :a}
+	:i :s}
+	:i $posmenu_add_options_to_menu$$part$ = %GLOBAL%$part$$from_cas$
+	:i $thugpro_menu_finalize$ isNull 
+:i endfunction
+:i function $create_part_cas_scale_menu$
+	:i $thugpro_menu_create$:s{
+		:i $menu_name$ = $scaling$
+		:i $menu_title$ = %s(7,"Scaling")
+		:i $menu_style$ = $MENU_STYLE_RIGHT$
+		:i $pad_back_script$ = %GLOBAL%$callback$
+		:i $pad_back_params$ = %GLOBAL%$callback_params$
+		:i $helper_text$ = $generic_helper_text_cas$
+		:i $wide_extra_text$
+		:i $boxed$
+	:i :s}
+	:i if $GotParam$$cam$
+		:i $SpawnSkaterScript$$SkateshopCasIdle$$params$ = :s{$cam_pos$ = %GLOBAL%$cam$:s}
+	:i endif
+	:i $SetScreenElementProps$:s{
+		:i $id$ = $current_menu$
+		:i $event_handlers$ = :a{
+			:i :s{$pad_alt$$cas_skater_left$$params$ = :s{:s}:s}
+			:i :s{$pad_alt2$$cas_skater_right$$params$ = :s{:s}:s}
+			:i :a}
+	:i :s}
+	:i $thugpro_scaling_menu_add_options_to_menu$:s{
+		:i $part$ = %GLOBAL%$bone_group$
+		:i %GLOBAL%$scaling_params$
+	:i :s}
+	:i $thugpro_menu_finalize$ isNull 
+	:i $__thugpro_scaling_menu_refresh$$part$ = %GLOBAL%$bone_group$
+:i endfunction
+:i $edit_skater_head_options$ = :a{
+	:i :s{
+		:i $group_title$ = %s(12,"HEAD OPTIONS")
+		:i $text$ = %sc(9,"\c3Ped Head Male")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$ped_m_head$$ped_m_head$:a}
+			:i $title$ = %s(10,"Ped Head Male")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_head_options$
+				:i $cam_pos$ = $head$
+			:i :s}
+			:i $desc_prefix$ = %s(8,"Ped Head Male")
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(10,"\c3Ped Head Male Color")
+		:i $pad_choose_script$ = $create_part_cas_color_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$ped_m_head$$ped_m_head$:a}
+			:i $title$ = %s(10,"Head Color")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_head_options$
+				:i $cam_pos$ = $head$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(9,"\c2Ped Head Female")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$ped_f_head$$ped_f_head$:a}
+			:i $title$ = %s(10,"Ped Head Female")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_head_options$
+				:i $cam_pos$ = $head$
+			:i :s}
+			:i $desc_prefix$ = %s(8,"Ped Head Female")
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(10,"\c2Ped Head Female Color")
+		:i $pad_choose_script$ = $create_part_cas_color_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$ped_f_head$$ped_f_head$:a}
+			:i $title$ = %s(10,"Head Color")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_head_options$
+				:i $cam_pos$ = $head$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(4,"Face")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$skater_m_head$$skater_f_head$:a}
+			:i $title$ = %s(10,"Face")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_head_options$
+				:i $cam_pos$ = $head$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(10,"Skin Color")
+		:i $pad_choose_script$ = $create_part_cas_color_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$skater_m_head$$skater_f_head$:a}
+			:i $title$ = %s(10,"Skin Color")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_head_options$
+				:i $cam_pos$ = $head$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(11,"Facial Hair")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$skater_m_jaw$:a}
+			:i $title$ = %s(10,"Facial Hair")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_head_options$
+				:i $cam_pos$ = $head$
+			:i :s}
+		:i :s}
+		:i $male_only$
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(17,"Facial Hair Color")
+		:i $pad_choose_script$ = $create_part_cas_color_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$skater_m_jaw$:a}
+			:i $title$ = %s(17,"Facial Hair Color")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_head_options$
+				:i $cam_pos$ = $head$
+			:i :s}
+		:i :s}
+		:i $male_only$
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(4,"Eyes")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$eyes$$eyes$:a}
+			:i $title$ = %s(17,"Eyes")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_head_options$
+				:i $cam_pos$ = $head$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(4,"\c5Hair Male")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$skater_m_hair$$skater_m_hair$:a}
+			:i $title$ = %s(17,"Hair Male")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_head_options$
+				:i $cam_pos$ = $head$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(10,"\c5Hair Male Color")
+		:i $pad_choose_script$ = $create_part_cas_color_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$skater_m_hair$$skater_m_hair$:a}
+			:i $title$ = %s(10,"Hair Color")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_head_options$
+				:i $cam_pos$ = $head$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(4,"\c4Hair Female")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$skater_f_hair$$skater_f_hair$:a}
+			:i $title$ = %s(17,"Hair Female")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_head_options$
+				:i $cam_pos$ = $head$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(10,"\c4Hair Female Color")
+		:i $pad_choose_script$ = $create_part_cas_color_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$skater_f_hair$$skater_f_hair$:a}
+			:i $title$ = %s(10,"Hair Color")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_head_options$
+				:i $cam_pos$ = $head$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(8,"\c6Hat Hair Male")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$skater_m_hat_hair$$skater_m_hat_hair$:a}
+			:i $title$ = %s(10,"Hat Hair Male")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_head_options$
+				:i $cam_pos$ = $head$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(14,"\c6Hat Hair Male Color")
+		:i $pad_choose_script$ = $create_part_cas_color_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$skater_m_hat_hair$$skater_m_hat_hair$:a}
+			:i $title$ = %s(14,"Hat Hair Color")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_head_options$
+				:i $cam_pos$ = $head$
+			:i :s}
+		:i :s}
+	:i :s}
+		:i :s{
+		:i $text$ = %sc(8,"\c7Hat Hair Female")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$skater_f_hat_hair$$skater_f_hat_hair$:a}
+			:i $title$ = %s(10,"Hat Hair Female")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_head_options$
+				:i $cam_pos$ = $head$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(14,"\c7Hat Hair Female Color")
+		:i $pad_choose_script$ = $create_part_cas_color_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$skater_f_hat_hair$$skater_f_hat_hair$:a}
+			:i $title$ = %s(14,"Hat Hair Color")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_head_options$
+				:i $cam_pos$ = $head$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(4,"Hats")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$hat$$hat$:a}
+			:i $title$ = %s(10,"Hats")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_head_options$
+				:i $cam_pos$ = $head$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(9,"Hat Color")
+		:i $pad_choose_script$ = $create_part_cas_color_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$hat$$hat$:a}
+			:i $title$ = %s(9,"Hat Color")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_head_options$
+				:i $cam_pos$ = $head$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(8,"Hat Logo")
+		:i $pad_choose_script$ = $create_part_logo_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$hat$$hat$:a}
+			:i $title$ = %s(10,"Hat Logo")
+			:i $logo_parts$ = :a{$hat_logo$$hat_logo$:a}
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_head_options$
+				:i $cam_pos$ = $head$
+			:i :s}
+			:i $show_logos$
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(7,"Glasses")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$glasses$$glasses$:a}
+			:i $title$ = %s(10,"Glasses")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_head_options$
+				:i $cam_pos$ = $head$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(13,"Glasses Color")
+		:i $pad_choose_script$ = $create_part_cas_color_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$glasses$$glasses$:a}
+			:i $title$ = %s(13,"Glasses Color")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_head_options$
+				:i $cam_pos$ = $head$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :a}
+:i $edit_skater_deck_options$ = :a{
+	:i :s{
+		:i $group_title$ = %s(12,"DECK OPTIONS")
+		:i $text$ = %sc(10,"Board Type")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$board$$board$:a}
+			:i $title$ = %s(13,"Board Type")
+			:i $cam$ = $board$
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_deck_options$
+				:i $cam_pos$ = $board$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(12,"Deck Graphic")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$deck_graphic$$deck_graphic$:a}
+			:i $title$ = %s(13,"Deck Graphic")
+			:i $allowed_items$ = $board_allow_graphic$
+			:i $cam$ = $board$
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_deck_options$
+				:i $cam_pos$ = $board$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(9,"Grip Tape")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$griptape$$griptape$:a}
+			:i $title$ = %s(13,"Grip Tape")
+			:i $allowed_items$ = $board_allow_griptape$
+			:i $cam$ = $board_griptape$
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_deck_options$
+				:i $cam_pos$ = $board$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(15,"Grip Tape Color")
+		:i $pad_choose_script$ = $create_part_cas_color_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$board$$board$:a}
+			:i $title$ = %s(13,"Grip Tape Color")
+			:i $color_parts$ = :a{$griptape$$griptape$:a}
+			:i $allowed_items$ = $board_allow_griptape_color$
+			:i $cam$ = $board_griptape$
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_deck_options$
+				:i $cam_pos$ = $board$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(6,"Trucks")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$truck_texture$$truck_texture$:a}
+			:i $title$ = %s(13,"Trucks")
+			:i $allowed_items$ = $board_allow_truck_texture$
+			:i $cam$ = $board$
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_deck_options$
+				:i $cam_pos$ = $board$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(11,"Truck Color")
+		:i $pad_choose_script$ = $create_part_cas_color_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$board$$board$:a}
+			:i $title$ = %s(13,"Trucks Color")
+			:i $color_parts$ = :a{$truck_texture$$truck_texture$:a}
+			:i $allowed_items$ = $board_allow_truck_color$
+			:i $cam$ = $board$
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_deck_options$
+				:i $cam_pos$ = $board$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(6,"Wheels")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$wheel_texture$$wheel_texture$:a}
+			:i $title$ = %s(13,"Wheels")
+			:i $allowed_items$ = $board_allow_wheel_texture$
+			:i $cam$ = $board$
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_deck_options$
+				:i $cam_pos$ = $board$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(11,"Wheel Color")
+		:i $pad_choose_script$ = $create_part_cas_color_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$board$$board$:a}
+			:i $title$ = %s(13,"Wheels Color")
+			:i $color_parts$ = :a{$wheel_texture$$wheel_texture$:a}
+			:i $allowed_items$ = $board_allow_wheel_color$
+			:i $cam$ = $board$
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_deck_options$
+				:i $cam_pos$ = $board$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :a}
+:i $edit_skater_graphics$ = :a{
+	:i :s{
+		:i $group_title$ = %s(15,"GRAPHIC OPTIONS")
+		:i $text$ = %sc(15,"Sticker Texture")
+		:i $pad_choose_script$ = $create_skater_texture_menu$
+		:i $pad_choose_params$ = :s{
+			:i $sticker$
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_graphics$
+				:i $cam_pos$ = $general$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(12,"Graffiti Tag")
+		:i $pad_choose_script$ = $create_skater_texture_menu$
+		:i $pad_choose_params$ = :s{
+			:i $cam_pos$ = $graffiti$
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_graphics$
+				:i $cam_pos$ = $general$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :a}
+:i $edit_skater_torso_options$ = :a{
+	:i :s{
+		:i $group_title$ = %s(13,"TORSO OPTIONS")
+		:i $text$ = %sc(11,"\c0Ped Body (90-101 crash)")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$ped_body$$ped_body$:a}
+			:i $title$ = %s(10,"Body (90-101 crash)")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_torso_options$
+				:i $cam_pos$ = $torso$
+			:i :s}
+			:i $desc_prefix$ = %s(8,"Ped Body")
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(11,"\c0Ped Body Color")
+		:i $pad_choose_script$ = $create_part_cas_color_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$ped_body$$ped_body$:a}
+			:i $title$ = %s(10,"Body Color")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_torso_options$
+				:i $cam_pos$ = $torso$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(11,"\c3Ped Torso Male (46-52 crash)")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$ped_m_torso$$ped_m_torso$:a}
+			:i $title$ = %s(10,"Torso (46-52 crash)")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_torso_options$
+				:i $cam_pos$ = $torso$
+			:i :s}
+			:i $desc_prefix$ = %s(8,"Ped Torso Male")
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(11,"\c3Ped Torso Male Color")
+		:i $pad_choose_script$ = $create_part_cas_color_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$ped_m_torso$$ped_m_torso$:a}
+			:i $title$ = %s(10,"Torso Color")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_torso_options$
+				:i $cam_pos$ = $torso$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(11,"\c2Ped Torso Female (14-15 crash)")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$ped_f_torso$$ped_f_torso$:a}
+			:i $title$ = %s(10,"Torso (14-15 crash)")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_torso_options$
+				:i $cam_pos$ = $torso$
+			:i :s}
+			:i $desc_prefix$ = %s(8,"Ped Torso Female")
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(11,"\c2Ped Torso Female Color")
+		:i $pad_choose_script$ = $create_part_cas_color_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$ped_f_torso$$ped_f_torso$:a}
+			:i $title$ = %s(10,"Torso Color")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_torso_options$
+				:i $cam_pos$ = $torso$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(11,"\c5Ped Accessories 1 (21-25 crash)")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$ped_m_accessories$$ped_m_accessories$:a}
+			:i $title$ = %s(10,"Accs 1 (21-25 crash)")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_torso_options$
+				:i $cam_pos$ = $torso$
+			:i :s}
+			:i $desc_prefix$ = %s(8,"Ped Accessories 1")
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(11,"\c5Ped Accessories 1 Color")
+		:i $pad_choose_script$ = $create_part_cas_color_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$ped_m_accessories$$ped_m_accessories$:a}
+			:i $title$ = %s(10,"Accessories 1 Color")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_torso_options$
+				:i $cam_pos$ = $torso$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(11,"\c4Ped Accessories 2 (only 4 crash)")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$ped_f_accessories$$ped_f_accessories$:a}
+			:i $title$ = %s(10,"Accs 2 (only 4 crash)")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_torso_options$
+				:i $cam_pos$ = $torso$
+			:i :s}
+			:i $desc_prefix$ = %s(8,"Ped Accessories 2")
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(11,"\c4Ped Accessories 2 Color")
+		:i $pad_choose_script$ = $create_part_cas_color_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$ped_f_accessories$$ped_f_accessories$:a}
+			:i $title$ = %s(10,"Accessories 2 Color")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_torso_options$
+				:i $cam_pos$ = $torso$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(11,"\c6Shirt Style Male")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$skater_m_torso$$skater_m_torso$:a}
+			:i $title$ = %s(10,"Shirt Style Male")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_torso_options$
+				:i $cam_pos$ = $torso$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(11,"\c6Shirt Male Color")
+		:i $pad_choose_script$ = $create_part_cas_color_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$skater_m_torso$$skater_m_torso$:a}
+			:i $title$ = %s(10,"Shirt Color")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_torso_options$
+				:i $cam_pos$ = $torso$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(19,"\c6Shirt Sleeves Male Color")
+		:i $pad_choose_script$ = $create_part_cas_color_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$skater_m_torso$$skater_,_torso$:a}
+			:i $title$ = %s(10,"Shirt Sleeves Color")
+			:i $color_parts$ = :a{$sleeves$$sleeves$:a}
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_torso_options$
+				:i $cam_pos$ = $torso$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(11,"\c7Shirt Style Female")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$skater_f_torso$$skater_f_torso$:a}
+			:i $title$ = %s(10,"Shirt Style Female")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_torso_options$
+				:i $cam_pos$ = $torso$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(11,"\c7Shirt Female Color")
+		:i $pad_choose_script$ = $create_part_cas_color_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$skater_f_torso$$skater_f_torso$:a}
+			:i $title$ = %s(10,"Shirt Color")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_torso_options$
+				:i $cam_pos$ = $torso$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(19,"\c7Shirt Sleeves Female Color")
+		:i $pad_choose_script$ = $create_part_cas_color_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$skater_f_torso$$skater_f_torso$:a}
+			:i $title$ = %s(10,"Shirt Sleeves Color")
+			:i $color_parts$ = :a{$sleeves$$sleeves$:a}
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_torso_options$
+				:i $cam_pos$ = $torso$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(16,"Shirt Front Logo")
+		:i $pad_choose_script$ = $create_part_logo_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$skater_m_torso$$skater_f_torso$:a}
+			:i $title$ = %s(10,"Shirt Front Logo")
+			:i $logo_parts$ = :a{$front_logo$$front_logo$:a}
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_torso_options$
+				:i $cam_pos$ = $torso$
+			:i :s}
+			:i $show_logos$
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(17,"Adjust Front Logo")
+		:i $pad_choose_script$ = $create_part_cas_pos_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$front_logo$$front_logo$:a}
+			:i $title$ = %s(10,"Adjust Front Logo")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_torso_options$
+				:i $cam_pos$ = $torso$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(15,"Shirt Back Logo")
+		:i $pad_choose_script$ = $create_part_logo_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$skater_m_torso$$skater_f_torso$:a}
+			:i $title$ = %s(10,"Shirt Back Logo")
+			:i $logo_parts$ = :a{$back_logo$$back_logo$:a}
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_torso_options$
+				:i $cam_pos$ = $torso$
+			:i :s}
+			:i $show_logos$
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(16,"Adjust Back Logo")
+		:i $pad_choose_script$ = $create_part_cas_pos_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$back_logo$$back_logo$:a}
+			:i $title$ = %s(10,"Adjust Back Logo")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_torso_options$
+				:i $cam_pos$ = $torso$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(9,"Elbowpads")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$elbowpads$$elbowpads$:a}
+			:i $title$ = %s(10,"Elbowpads")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_torso_options$
+				:i $cam_pos$ = $torso$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(15,"Elbowpads Color")
+		:i $pad_choose_script$ = $create_part_cas_color_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$elbowpads$$elbowpads$:a}
+			:i $title$ = %s(10,"Elbowpads Color")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_torso_options$
+				:i $cam_pos$ = $torso$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(8,"Backpack")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$skater_m_backpack$$skater_f_backpack$:a}
+			:i $title$ = %s(10,"Backpack")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_torso_options$
+				:i $cam_pos$ = $torso$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(10,"Pack Color")
+		:i $pad_choose_script$ = $create_part_cas_color_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$skater_m_backpack$$skater_f_backpack$:a}
+			:i $title$ = %s(10,"Pack Color")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_torso_options$
+				:i $cam_pos$ = $torso$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(14,"Left Accessory")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$accessory1$$accessory1$:a}
+			:i $title$ = %s(10,"Left Accessory")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_torso_options$
+				:i $cam_pos$ = $torso$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(20,"Left Accessory Color")
+		:i $pad_choose_script$ = $create_part_cas_color_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$accessory1$$accessory1$:a}
+			:i $title$ = %s(10,"Accessory Color")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_torso_options$
+				:i $cam_pos$ = $torso$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(15,"Right Accessory")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$accessory2$$accessory2$:a}
+			:i $title$ = %s(10,"Right Accessory")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_torso_options$
+				:i $cam_pos$ = $torso$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(21,"Right Accessory Color")
+		:i $pad_choose_script$ = $create_part_cas_color_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$accessory2$$accessory2$:a}
+			:i $title$ = %s(10,"Accessory Color")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_torso_options$
+				:i $cam_pos$ = $torso$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(6,"\c9Gloves Male")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$skater_m_hands$$skater_m_hands$:a}
+			:i $title$ = %s(10,"Gloves Male")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_torso_options$
+				:i $cam_pos$ = $torso$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(12,"\c9Gloves Male Color")
+		:i $pad_choose_script$ = $create_part_cas_color_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$skater_m_hands$$skater_m_hands$:a}
+			:i $title$ = %s(10,"Gloves Color")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_torso_options$
+				:i $cam_pos$ = $torso$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(6,"\c8Gloves Female")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$skater_f_hands$$skater_f_hands$:a}
+			:i $title$ = %s(10,"Gloves Female")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_torso_options$
+				:i $cam_pos$ = $torso$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(12,"\c8Gloves Female Color")
+		:i $pad_choose_script$ = $create_part_cas_color_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$skater_f_hands$$skater_f_hands$:a}
+			:i $title$ = %s(10,"Gloves Color")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_torso_options$
+				:i $cam_pos$ = $torso$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(10,"Misc Items")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$accessory3$$accessory3$:a}
+			:i $title$ = %s(10,"Misc Items")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_torso_options$
+				:i $cam_pos$ = $torso$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(16,"Misc Items Color")
+		:i $pad_choose_script$ = $create_part_cas_color_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$accessory3$$accessory3$:a}
+			:i $title$ = %s(10,"Misc Items Color")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_torso_options$
+				:i $cam_pos$ = $torso$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :a}
+:i $edit_skater_leg_options$ = :a{
+	:i :s{
+		:i $group_title$ = %s(11,"LEG OPTIONS")
+		:i $text$ = %sc(5,"\c0Ped Legs Male (43-49 crash)")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$ped_m_legs$$ped_m_legs$:a}
+			:i $title$ = %s(10,"Legs (43-49 crash)")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_leg_options$
+				:i $cam_pos$ = $legs$
+			:i :s}
+			:i $desc_prefix$ = %s(8,"Ped Legs Male")
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(11,"\c0Ped Legs Male Color")
+		:i $pad_choose_script$ = $create_part_cas_color_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$ped_m_legs$$ped_m_legs$:a}
+			:i $title$ = %s(10,"Legs Color")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_leg_options$
+				:i $cam_pos$ = $legs$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(5,"\c3Ped Legs Female (13-14 crash)")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$ped_f_legs$$ped_f_legs$:a}
+			:i $title$ = %s(10,"Legs (13-14 crash)")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_leg_options$
+				:i $cam_pos$ = $legs$
+			:i :s}
+			:i $desc_prefix$ = %s(8,"Ped Legs Female")
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(11,"\c3Ped Legs Female Color")
+		:i $pad_choose_script$ = $create_part_cas_color_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$ped_f_legs$$ped_f_legs$:a}
+			:i $title$ = %s(10,"Legs Color")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_leg_options$
+				:i $cam_pos$ = $legs$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(5,"\c2Pants Male")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$skater_m_legs$$skater_m_legs$:a}
+			:i $title$ = %s(10,"Pants Male")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_leg_options$
+				:i $cam_pos$ = $legs$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(11,"\c2Pants Male Color")
+		:i $pad_choose_script$ = $create_part_cas_color_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$skater_m_legs$$skater_m_legs$:a}
+			:i $title$ = %s(10,"Pants Color")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_leg_options$
+				:i $cam_pos$ = $legs$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(5,"\c4Pants Female")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$skater_f_legs$$skater_f_legs$:a}
+			:i $title$ = %s(10,"Pants Female")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_leg_options$
+				:i $cam_pos$ = $legs$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(11,"\c4Pants Female Color")
+		:i $pad_choose_script$ = $create_part_cas_color_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$skater_f_legs$$skater_f_legs$:a}
+			:i $title$ = %s(10,"Pants Color")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_leg_options$
+				:i $cam_pos$ = $legs$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(8,"Kneepads")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$kneepads$$kneepads$:a}
+			:i $title$ = %s(10,"Kneepads")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_leg_options$
+				:i $cam_pos$ = $legs$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(14,"Kneepads Color")
+		:i $pad_choose_script$ = $create_part_cas_color_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$kneepads$$kneepads$:a}
+			:i $title$ = %s(10,"Kneepads Color")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_leg_options$
+				:i $cam_pos$ = $legs$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(5,"Socks")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$socks$$socks$:a}
+			:i $title$ = %s(10,"Socks")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_leg_options$
+				:i $cam_pos$ = $legs$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(11,"Socks Color")
+		:i $pad_choose_script$ = $create_part_cas_color_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$socks$$socks$:a}
+			:i $title$ = %s(10,"Socks Color")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_leg_options$
+				:i $cam_pos$ = $legs$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(5,"Shoes")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$shoes$$shoes$:a}
+			:i $title$ = %s(10,"Shoes")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_leg_options$
+				:i $cam_pos$ = $legs$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(11,"Shoes Color")
+		:i $pad_choose_script$ = $create_part_cas_color_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$shoes$$shoes$:a}
+			:i $title$ = %s(10,"Shoes Color")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_leg_options$
+				:i $cam_pos$ = $legs$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(14,"Shoelace Color")
+		:i $pad_choose_script$ = $create_part_cas_color_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$shoes$$shoes$:a}
+			:i $title$ = %s(10,"Shoelace Color")
+			:i $color_parts$ = :a{$shoe_laces$$shoe_laces$:a}
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_leg_options$
+				:i $cam_pos$ = $legs$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :a}
+:i $edit_skater_tattoo_options$ = :a{
+	:i :s{
+		:i $group_title$ = %s(14,"TATTOO OPTIONS")
+		:i $text$ = %sc(11,"Head Tattoo")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$head_tattoo$$head_tattoo$:a}
+			:i $title$ = %s(10,"Head Tattoo")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_tattoo_options$
+				:i $cam_pos$ = $general$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(12,"Chest Tattoo")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$chest_tattoo$$chest_tattoo$:a}
+			:i $title$ = %s(10,"Chest Tattoo")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_tattoo_options$
+				:i $cam_pos$ = $general$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(19,"Adjust Chest Tattoo")
+		:i $pad_choose_script$ = $create_part_cas_pos_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$chest_tattoo$$chest_tattoo$:a}
+			:i $title$ = %s(10,"Adjust Chest Tattoo")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_tattoo_options$
+				:i $cam_pos$ = $general$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(11,"Back Tattoo")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$back_tattoo$$back_tattoo$:a}
+			:i $title$ = %s(10,"Back Tattoo")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_tattoo_options$
+				:i $cam_pos$ = $general$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(18,"Adjust Back Tattoo")
+		:i $pad_choose_script$ = $create_part_cas_pos_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$back_tattoo$$back_tattoo$:a}
+			:i $title$ = %s(10,"Adjust Back Tattoo")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_tattoo_options$
+				:i $cam_pos$ = $general$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(14,"L Bicep Tattoo")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$left_bicep_tattoo$$left_bicep_tattoo$:a}
+			:i $title$ = %s(10,"L Bicep Tattoo")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_tattoo_options$
+				:i $cam_pos$ = $general$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(21,"Adjust L Bicep Tattoo")
+		:i $pad_choose_script$ = $create_part_cas_pos_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$left_bicep_tattoo$$left_bicep_tattoo$:a}
+			:i $title$ = %s(10,"Adjust L Bicep Tattoo")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_tattoo_options$
+				:i $cam_pos$ = $general$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(14,"R Bicep Tattoo")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$right_bicep_tattoo$$right_bicep_tattoo$:a}
+			:i $title$ = %s(10,"R Bicep Tattoo")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_tattoo_options$
+				:i $cam_pos$ = $general$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(21,"Adjust R Bicep Tattoo")
+		:i $pad_choose_script$ = $create_part_cas_pos_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$right_bicep_tattoo$$right_bicep_tattoo$:a}
+			:i $title$ = %s(10,"Adjust R Bicep Tattoo")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_tattoo_options$
+				:i $cam_pos$ = $general$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(15,"R Sleeve Tattoo")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$right_sleeve_tattoo$$right_sleeve_tattoo$:a}
+			:i $title$ = %s(10,"R Sleeve Tattoo")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_tattoo_options$
+				:i $cam_pos$ = $general$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(22,"Adjust R Sleeve Tattoo")
+		:i $pad_choose_script$ = $create_part_cas_pos_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$right_sleeve_tattoo$$right_sleeve_tattoo$:a}
+			:i $title$ = %s(10,"Adjust R Sleeve Tattoo")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_tattoo_options$
+				:i $cam_pos$ = $general$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(15,"L Sleeve Tattoo")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$left_sleeve_tattoo$$left_sleeve_tattoo$:a}
+			:i $title$ = %s(10,"L Sleeve Tattoo")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_tattoo_options$
+				:i $cam_pos$ = $general$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(22,"Adjust L Sleeve Tattoo")
+		:i $pad_choose_script$ = $create_part_cas_pos_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$left_sleeve_tattoo$$left_sleeve_tattoo$:a}
+			:i $title$ = %s(10,"Adjust L Sleeve Tattoo")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_tattoo_options$
+				:i $cam_pos$ = $general$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(16,"L Forearm Tattoo")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$left_forearm_tattoo$$left_forearm_tattoo$:a}
+			:i $title$ = %s(10,"L Forearm Tattoo")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_tattoo_options$
+				:i $cam_pos$ = $general$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(23,"Adjust L Forearm Tattoo")
+		:i $pad_choose_script$ = $create_part_cas_pos_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$left_forearm_tattoo$$left_forearm_tattoo$:a}
+			:i $title$ = %s(10,"Adjust L Forearm Tattoo")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_tattoo_options$
+				:i $cam_pos$ = $general$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(16,"R Forearm Tattoo")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$right_forearm_tattoo$$right_forearm_tattoo$:a}
+			:i $title$ = %s(10,"Adjust R Forearm Tattoo")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_tattoo_options$
+				:i $cam_pos$ = $general$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(23,"Adjust R Forearm Tattoo")
+		:i $pad_choose_script$ = $create_part_cas_pos_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$right_forearm_tattoo$$right_forearm_tattoo$:a}
+			:i $title$ = %s(10,"Adjust R Forearm Tattoo")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_tattoo_options$
+				:i $cam_pos$ = $general$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(12,"L Leg Tattoo")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$left_leg_tattoo$$left_leg_tattoo$:a}
+			:i $title$ = %s(10,"L Leg Tattoo")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_tattoo_options$
+				:i $cam_pos$ = $general$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(19,"Adjust L Leg Tattoo")
+		:i $pad_choose_script$ = $create_part_cas_pos_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$left_leg_tattoo$$left_leg_tattoo$:a}
+			:i $title$ = %s(10,"Adjust L Leg Tattoo")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_tattoo_options$
+				:i $cam_pos$ = $general$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(12,"R Leg Tattoo")
+		:i $pad_choose_script$ = $create_part_cas_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$right_leg_tattoo$$right_leg_tattoo$:a}
+			:i $title$ = %s(10,"R Leg Tattoo")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_tattoo_options$
+				:i $cam_pos$ = $general$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(19,"Adjust R Leg Tattoo")
+		:i $pad_choose_script$ = $create_part_cas_pos_menu$
+		:i $pad_choose_params$ = :s{
+			:i $parts$ = :a{$right_leg_tattoo$$right_leg_tattoo$:a}
+			:i $title$ = %s(10,"Adjust R Leg Tattoo")
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_tattoo_options$
+				:i $cam_pos$ = $general$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :a}
+:i $edit_skater_scaling_options$ = :a{
+	:i :s{
+		:i $group_title$ = %s(13,"SCALE OPTIONS")
+		:i $text$ = %sc(4,"Body")
+		:i $pad_choose_script$ = $create_part_cas_scale_menu$
+		:i $pad_choose_params$ = :s{
+			:i $title$ = %s(10,"Body")
+			:i $scaling_params$ = :s{$affectX$$affectY$$affectZ$$affectXYZ$:s}
+			:i $bone_group$ = $object_scaling$
+			:i $cam$ = $general$
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_scaling_options$
+				:i $cam_pos$ = $general$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(8,"Head Top")
+		:i $pad_choose_script$ = $create_part_cas_scale_menu$
+		:i $pad_choose_params$ = :s{
+			:i $title$ = %s(10,"Head Top")
+			:i $scaling_params$ = :s{$affectX$$affectY$$affectZ$$affectXYZ$:s}
+			:i $bone_group$ = $headtop_bone_group$
+			:i $cam$ = $head$
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_scaling_options$
+				:i $cam_pos$ = $head$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(4,"Face")
+		:i $pad_choose_script$ = $create_part_cas_scale_menu$
+		:i $pad_choose_params$ = :s{
+			:i $title$ = %s(10,"Face")
+			:i $scaling_params$ = :s{$affectX$$affectY$$affectZ$$affectXYZ$:s}
+			:i $bone_group$ = $head_bone_group$
+			:i $cam$ = $head$
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_scaling_options$
+				:i $cam_pos$ = $head$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(4,"Nose")
+		:i $pad_choose_script$ = $create_part_cas_scale_menu$
+		:i $pad_choose_params$ = :s{
+			:i $title$ = %s(10,"Nose")
+			:i $scaling_params$ = :s{$affectX$$affectY$$affectZ$$affectXYZ$:s}
+			:i $bone_group$ = $nose_bone_group$
+			:i $cam$ = $head$
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_scaling_options$
+				:i $cam_pos$ = $head$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(3,"Jaw")
+		:i $pad_choose_script$ = $create_part_cas_scale_menu$
+		:i $pad_choose_params$ = :s{
+			:i $title$ = %s(10,"Jaw")
+			:i $scaling_params$ = :s{$affectX$$affectY$$affectZ$$affectXYZ$:s}
+			:i $bone_group$ = $Jaw_bone_group$
+			:i $cam$ = $head$
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_scaling_options$
+				:i $cam_pos$ = $head$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(5,"Chest")
+		:i $pad_choose_script$ = $create_part_cas_scale_menu$
+		:i $pad_choose_params$ = :s{
+			:i $title$ = %s(10,"Chest")
+			:i $scaling_params$ = :s{$affectX$$affectY$$affectZ$$affectXYZ$:s}
+			:i $bone_group$ = $torso_bone_group$
+			:i $cam$ = $torso$
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_scaling_options$
+				:i $cam_pos$ = $torso$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(5,"Waist")
+		:i $pad_choose_script$ = $create_part_cas_scale_menu$
+		:i $pad_choose_params$ = :s{
+			:i $title$ = %s(10,"Waist")
+			:i $scaling_params$ = :s{$affectX$$affectY$$affectZ$$affectXYZ$:s}
+			:i $bone_group$ = $stomach_bone_group$
+			:i $cam$ = $torso$
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_scaling_options$
+				:i $cam_pos$ = $torso$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(6,"Biceps")
+		:i $pad_choose_script$ = $create_part_cas_scale_menu$
+		:i $pad_choose_params$ = :s{
+			:i $title$ = %s(10,"Biceps")
+			:i $scaling_params$ = :s{$affectX$$affectY$$affectZ$$affectXYZ$:s}
+			:i $bone_group$ = $upper_arm_bone_group$
+			:i $cam$ = $torso$
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_scaling_options$
+				:i $cam_pos$ = $torso$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(8,"Forearms")
+		:i $pad_choose_script$ = $create_part_cas_scale_menu$
+		:i $pad_choose_params$ = :s{
+			:i $title$ = %s(10,"Forearms")
+			:i $scaling_params$ = :s{$affectX$$affectY$$affectZ$$affectXYZ$:s}
+			:i $bone_group$ = $lower_arm_bone_group$
+			:i $cam$ = $torso$
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_scaling_options$
+				:i $cam_pos$ = $torso$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(5,"Hands")
+		:i $pad_choose_script$ = $create_part_cas_scale_menu$
+		:i $pad_choose_params$ = :s{
+			:i $title$ = %s(10,"Hands")
+			:i $scaling_params$ = :s{$affectX$$affectY$$affectZ$$affectXYZ$:s}
+			:i $bone_group$ = $hands_bone_group$
+			:i $cam$ = $torso$
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_scaling_options$
+				:i $cam_pos$ = $torso$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(6,"Thighs")
+		:i $pad_choose_script$ = $create_part_cas_scale_menu$
+		:i $pad_choose_params$ = :s{
+			:i $title$ = %s(10,"Thighs")
+			:i $scaling_params$ = :s{$affectX$$affectY$$affectZ$$affectXYZ$:s}
+			:i $bone_group$ = $upper_leg_bone_group$
+			:i $cam$ = $legs$
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_scaling_options$
+				:i $cam_pos$ = $legs$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(6,"Calves")
+		:i $pad_choose_script$ = $create_part_cas_scale_menu$
+		:i $pad_choose_params$ = :s{
+			:i $title$ = %s(10,"Calves")
+			:i $scaling_params$ = :s{$affectX$$affectY$$affectZ$$affectXYZ$:s}
+			:i $bone_group$ = $lower_leg_bone_group$
+			:i $cam$ = $legs$
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_scaling_options$
+				:i $cam_pos$ = $legs$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(4,"Feet")
+		:i $pad_choose_script$ = $create_part_cas_scale_menu$
+		:i $pad_choose_params$ = :s{
+			:i $title$ = %s(10,"Feet")
+			:i $scaling_params$ = :s{$affectX$$affectY$$affectZ$$affectXYZ$:s}
+			:i $bone_group$ = $feet_bone_group$
+			:i $cam$ = $legs$
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_scaling_options$
+				:i $cam_pos$ = $legs$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(6,"Wheels")
+		:i $pad_choose_script$ = $create_part_cas_scale_menu$
+		:i $pad_choose_params$ = :s{
+			:i $title$ = %s(10,"Wheels")
+			:i $scaling_params$ = :s{$affectX$$affectY$$affectZ$$affectXYZ$:s}
+			:i $parts$ = :a{$board$;$board$:a}
+			:i $bone_group$ = $wheels_bone_group$
+			:i $allowed_items$ = $board_allow_wheel_scale$
+			:i $cam$ = $board$
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_scaling_options$
+				:i $cam_pos$ = $legs$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :s{
+		:i $text$ = %sc(5,"Board")
+		:i $pad_choose_script$ = $create_part_cas_scale_menu$
+		:i $pad_choose_params$ = :s{
+			:i $title$ = %s(10,"Board")
+			:i $scaling_params$ = :s{$affectX$$affectY$$affectZ$$affectXYZ$:s}
+			:i $parts$ = :a{$board$;$board$:a}
+			:i $bone_group$ = $board_bone_group$
+			:i $cam$ = $board$
+			:i $callback$ = $edit_skater_create_options_menu$
+			:i $callback_params$ = :s{
+				:i $options_array$ = $edit_skater_scaling_options$
+				:i $cam_pos$ = $legs$
+			:i :s}
+		:i :s}
+	:i :s}
+	:i :a}
+:i $scalingmenu_scale_increment$ = %i(1,00000001)
+:i $scalingmenu_min_scale$ = %f(0.000000)
+:i $scalingmenu_max_scale$ = %f(999999.000000)
+:i $scalingmenu_constraints$ = :a{
+	:i :s{$part$ = $object_scaling$$male_min$ = %f(0.000000)$male_max$ = %f(999999.000000)$female_min$ = %f(0.000000)$female_max$ = %f(999999.000000):s}
+	:i :s{$part$ = $headtop_bone_group$$male_min$ = %f(0.000000)$male_max$ = %f(999999.000000)$female_min$ = %f(0.000000)$female_max$ = %f(999999.000000):s}
+	:i :s{$part$ = $head_bone_group$$male_min$ = %f(0.000000)$male_max$ = %f(999999.000000)$female_min$ = %f(0.000000)$female_max$ = %f(999999.000000):s}
+	:i :s{$part$ = $nose_bone_group$$male_min$ = %f(0.000000)$male_max$ = %f(999999.000000)$female_min$ = %f(0.000000)$female_max$ = %f(999999.000000):s}
+	:i :s{$part$ = $Jaw_bone_group$$male_min$ = %f(0.000000)$male_max$ = %f(999999.000000)$female_min$ = %f(0.000000)$female_max$ = %f(999999.000000):s}
+	:i :s{$part$ = $torso_bone_group$$male_min$ = %f(0.000000)$male_max$ = %f(999999.000000)$female_min$ = %f(0.000000)$female_max$ = %f(999999.000000):s}
+	:i :s{$part$ = $stomach_bone_group$$male_min$ = %f(0.000000)$male_max$ = %f(999999.000000)$female_min$ = %f(0.000000)$female_max$ = %f(999999.000000):s}
+	:i :s{$part$ = $upper_arm_bone_group$$male_min$ = %f(0.000000)$male_max$ = %f(999999.000000)$female_min$ = %f(0.000000)$female_max$ = %f(999999.000000):s}
+	:i :s{$part$ = $lower_arm_bone_group$$male_min$ = %f(0.000000)$male_max$ = %f(999999.000000)$female_min$ = %f(0.000000)$female_max$ = %f(999999.000000):s}
+	:i :s{$part$ = $hands_bone_group$$male_min$ = %f(0.000000)$male_max$ = %f(999999.000000)$female_min$ = %f(0.000000)$female_max$ = %f(999999.000000):s}
+	:i :s{$part$ = $upper_leg_bone_group$$male_min$ = %f(0.000000)$male_max$ = %f(999999.000000)$female_min$ = %f(0.000000)$female_max$ = %f(999999.000000):s}
+	:i :s{$part$ = $lower_leg_bone_group$$male_min$ = %f(0.000000)$male_max$ = %f(999999.000000)$female_min$ = %f(0.000000)$female_max$ = %f(999999.000000):s}
+	:i :s{$part$ = $feet_bone_group$$male_min$ = %f(0.000000)$male_max$ = %f(999999.000000)$female_min$ = %f(0.000000)$female_max$ = %f(999999.000000):s}
+	:i :s{$part$ = $board_bone_group$$male_min$ = %f(0.000000)$male_max$ = %f(999999.000000)$female_min$ = %f(0.000000)$female_max$ = %f(999999.000000):s}
+	:i :s{$part$ = $wheels_bone_group$$male_min$ = %f(0.000000)$male_max$ = %f(999999.000000)$female_min$ = %f(0.000000)$female_max$ = %f(999999.000000):s}
+	:i :a}
+:i function $scalingmenu_refresh_skaters$
+	:i if $InNetGame$
+		:i $script_assert$%s(62,"scalingmenu_refresh_skaters should not be called in net games!")
+	:i endif
+	:i $GetCurrentSkaterProfileIndex$
+	:i $RefreshSkaterScale$$skater$ = %i(0,00000000)$profile$ = %GLOBAL%$CurrentSkaterProfileIndex$
+:i endfunction
+:i function $scalingmenu_get_limits$
+	:i $GetCurrentSkaterProfileIndex$
+	:i $GetSkaterProfileInfo$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$
+	:i $GetArraySize$$scalingmenu_constraints$
+	:i %GLOBAL%$index$ = %i(0,00000000)
+	:i while
+		
+		:i if $ChecksumEquals$$a$ =  ( ($scalingmenu_constraints$:a{%GLOBAL%$index$:a}) ->$part$) $b$ = %GLOBAL%$part$
+			:i if  (%GLOBAL%$is_male$ = %i(1,00000001)) 
+				:i %GLOBAL%$min$ =  ( ($scalingmenu_constraints$:a{%GLOBAL%$index$:a}) ->$male_min$) 
+				:i %GLOBAL%$max$ =  ( ($scalingmenu_constraints$:a{%GLOBAL%$index$:a}) ->$male_max$) 
+			:i else 
+				:i %GLOBAL%$min$ =  ( ($scalingmenu_constraints$:a{%GLOBAL%$index$:a}) ->$female_min$) 
+				:i %GLOBAL%$max$ =  ( ($scalingmenu_constraints$:a{%GLOBAL%$index$:a}) ->$female_max$) 
+			:i endif
+			:i continue
+			
+		:i endif
+		:i %GLOBAL%$index$ =  (%GLOBAL%$index$ + %i(1,00000001)) 
+	:i loop_to %GLOBAL%$array_size$
+	:i if NOT $GotParam$$min$
+		:i %GLOBAL%$min$ = %f(90.000000)
+	:i endif
+	:i if NOT $GotParam$$max$
+		:i %GLOBAL%$max$ = %f(150.000000)
+	:i endif
+	:i return
+	$min$ = %GLOBAL%$min$$max$ = %GLOBAL%$max$
+:i endfunction
+:i function $scalingmenu_set_xyz$
+	:i $GetCurrentSkaterProfileIndex$
+	:i $SetPlayerAppearanceScale$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$$part$ = %GLOBAL%$part$$x$ = %GLOBAL%$x$$y$ = %GLOBAL%$y$$z$ = %GLOBAL%$z$$use_default_scale$ = %i(0,00000000)
+:i endfunction
+:i $skater_sticker_item_menu_selection$ = %i(0,00000000)
+:i function $create_skater_texture_menu$
+	:i if $ScreenElementExists$$id$ = $current_menu_anchor$
+		:i $DestroyScreenElement$$id$ = $current_menu_anchor$
+	:i endif
+	:i if $GotParam$$sticker$
+		:i $type$ = $sticker$
+		:i $title$ = %s(14,"Select Sticker")
+		:i $image_array$ = $thugpro_sticker_textures$
+	:i else 
+		:i if $GotParam$$test$
+			:i $type$ = $test$
+			:i $title$ = %s(11,"Choose Face")
+			:i $image_array$ = $edit_face_textures$
+		:i else 
+			:i $type$ = $tag$
+			:i $title$ = %s(15,"Choose Graffiti")
+			:i $image_array$ = $edit_graffiti_tags$
+		:i endif
+	:i endif
+	:i if $GotParam$$cam_pos$
+		:i $SpawnSkaterScript$$SkateshopCasIdle$$params$ = :s{$cam_pos$ = %GLOBAL%$cam_pos$:s}
+	:i endif
+	:i $create_menu_background_title$$title$ = %GLOBAL%$title$$bg_just$ = $right_scroll$$no_grain$
+	:i %GLOBAL%$heap$ = $FrontEnd$
+	:i $SetScreenElementLock$$id$ = $root_window$$off$
+	:i $CreateScreenElement$:s{
+		:i $type$ = $ContainerElement$
+		:i $parent$ = $root_window$
+		:i $id$ = $current_menu_anchor$
+		:i $dims$ = %vec2(640.000000,480.000000)
+		:i $pos$ = %vec2(320.000000,240.000000)
+		:i $heap$ = %GLOBAL%$heap$
+	:i :s}
+	:i $create_helper_text$:s{
+		:i $helper_text_elements$ = :a{
+			:i :s{$text$ = %s(24,"\b7/\b4/\b6/\b5 = Select"):s}
+			:i :s{$text$ = %s(10,"\bn = Back"):s}
+			:i :s{$text$ = %s(12,"\bm = Accept"):s}
+			:i :a}
+	:i :s}
+	:i $CreateScreenElement$:s{
+		:i $type$ = $VScrollingMenu$
+		:i $parent$ = $current_menu_anchor$
+		:i $id$ = $edit_skater_sticker_vscrollingmenu$
+		:i $just$ = :a{$left$$top$:a}
+		:i $pos$ = %vec2(405.000000,156.000000)
+		:i $scale$ = %f(0.800000)
+		:i $dims$ = %vec2(224.000000,212.000000)
+		:i $alpha$ = %i(0,00000000)
+		:i $heap$ = %GLOBAL%$heap$
+	:i :s}
+	:i $CreateScreenElement$:s{
+		:i $type$ = $VMenu$
+		:i $parent$ = $edit_skater_sticker_vscrollingmenu$
+		:i $id$ = $edit_skater_sticker_vmenu$
+		:i $spacing_between$ = %i(4,00000004)
+		:i $pos$ = %vec2(0.000000,0.000000)
+		:i $just$ = :a{$left$$top$:a}
+		:i $dims$ = %vec2(224.000000,212.000000)
+		:i $tags$ = :s{$category_index$ = %GLOBAL%$index$:s}
+		:i $heap$ = %GLOBAL%$heap$
+	:i :s}
+	:i $SetScreenElementProps$:s{
+		:i $id$ = $edit_skater_sticker_vmenu$
+		:i $event_handlers$ = :a{
+			:i :s{$pad_back$$generic_menu_pad_back_sound$:s}
+			:i :s{$pad_back$%GLOBAL%$callback$$params$ = %GLOBAL%$callback_params$:s}
+			:i :s{$pad_up$$generic_menu_up_or_down_sound$$params$ = :s{$up$:s}:s}
+			:i :s{$pad_down$$generic_menu_up_or_down_sound$$params$ = :s{$down$:s}:s}
+			:i :s{$pad_alt$$cas_skater_left$$params$ = :s{:s}:s}
+			:i :s{$pad_alt2$$cas_skater_right$$params$ = :s{:s}:s}
+			:i :a}
+		:i $replace_handlers$
+	:i :s}
+	:i $GetArraySize$%GLOBAL%$image_array$
+	:i %GLOBAL%$index$ = %i(0,00000000)
+	:i %GLOBAL%$hcounter$ = %i(0,00000000)
+	:i %GLOBAL%$row_counter$ = %i(0,00000000)
+	:i while
+		
+		:i if $GotParam$$sticker$
+			:i if  (%GLOBAL%$index$ < %i(11,0000000b)) 
+				:i if  (%GLOBAL%$index$ < %i(1,00000001)) 
+					:i $texture_scale$ = %f(0.440000)
+				:i else 
+					:i $texture_scale$ = %f(0.220000)
+				:i endif
+			:i else 
+				:i $texture_scale$ = %f(0.900000)
+			:i endif
+		:i else 
+			:i if  (%GLOBAL%$index$ < %i(1,00000001)) 
+				:i $texture_scale$ = %f(0.220000)
+			:i else 
+				:i $texture_scale$ = %f(0.440000)
+			:i endif
+		:i endif
+		:i if  (%GLOBAL%$hcounter$ = %i(0,00000000)) 
+			:i $FormatText$$ChecksumName$ = $menu_id$%s(26,"edit_skater_sticker_row_%i")$i$ = %GLOBAL%$row_counter$
+			:i $CreateScreenElement$:s{
+				:i $type$ = $hmenu$
+				:i $parent$ = $edit_skater_sticker_vmenu$
+				:i $id$ = %GLOBAL%$menu_id$
+				:i $spacing_between$ = %i(4,00000004)
+				:i $dims$ = %vec2(224.000000,68.000000)
+				:i $pos$ = %vec2(0.000000,0.000000)
+				:i $just$ = :a{$left$$top$:a}
+				:i $heap$ = %GLOBAL%$heap$
+			:i :s}
+			:i $SetScreenElementProps$:s{
+				:i $id$ = %GLOBAL%$menu_id$
+				:i $event_handlers$ = :a{:s{$focus$$edit_skater_sticker_menu_focus$$params$ = :s{$menu_id$ = %GLOBAL%$menu_id$:s}:s}
+					:i :s{$pad_left$$check_ok_pad_left$:s}
+					:i :s{$pad_right$$check_ok_pad_right$:s}
+					:i :a}
+				:i $replace_handlers$
+			:i :s}
+			:i $AssignAlias$$id$ = %GLOBAL%$menu_id$$alias$ = $current_sticker_hmenu$
+			:i %GLOBAL%$row_counter$ =  (%GLOBAL%$row_counter$ + %i(1,00000001)) 
+		:i endif
+		:i $GetTextureFromPath$$path$ =  (%GLOBAL%$image_array$:a{%GLOBAL%$index$:a}) 
+		:i $FormatText$$ChecksumName$ = $texture_id$%s(2,"%t")$t$ = %GLOBAL%$texture$
+		:i $edit_skater_add_sticker_menu_item$$texture$ = %GLOBAL%$texture_id$$index$ = %GLOBAL%$index$$hindex$ = %GLOBAL%$hcounter$$texture_string$ =  (%GLOBAL%$image_array$:a{%GLOBAL%$index$:a}) $scale$ = %GLOBAL%$texture_scale$$type$ = %GLOBAL%$type$
+		:i %GLOBAL%$hcounter$ =  (%GLOBAL%$hcounter$ + %i(1,00000001)) 
+		:i if  (%GLOBAL%$hcounter$ = %i(4,00000004)) 
+			:i %GLOBAL%$hcounter$ = %i(0,00000000)
+		:i endif
+		:i %GLOBAL%$index$ =  (%GLOBAL%$index$ + %i(1,00000001)) 
+	:i loop_to %GLOBAL%$array_size$
+	:i if  ( (%GLOBAL%$hcounter$ < %i(4,00000004))  AND  (%GLOBAL%$hcounter$ > %i(0,00000000)) ) 
+		:i while
+			
+			:i $CreateScreenElement$:s{
+				:i $parent$ = $current_sticker_hmenu$
+				:i $type$ = $ContainerElement$
+				:i $dims$ = %vec2(68.000000,68.000000)
+				:i $not_focusable$
+				:i $just$ = :a{$left$$top$:a}
+				:i $heap$ = %GLOBAL%$heap$
+			:i :s}
+			:i %GLOBAL%$hcounter$ =  (%GLOBAL%$hcounter$ + %i(1,00000001)) 
+			:i if  (%GLOBAL%$hcounter$ = %i(4,00000004)) 
+				:i continue
+				
+			:i endif
+		:i loop_to 
+	:i endif
+	:i $change$$skater_sticker_item_menu_selection$ = %i(0,00000000)
+	:i $wait$%i(2,00000002)$gameframes$
+	:i if $ScreenElementExists$$id$ = $edit_skater_sticker_vscrollingmenu$
+		:i $SetScreenElementProps$$id$ = $edit_skater_sticker_vscrollingmenu$$reset_window_top$
+		:i $DoScreenElementMorph$$id$ = $edit_skater_sticker_vscrollingmenu$$alpha$ = %i(1,00000001)
+	:i endif
+	:i if $ScreenElementExists$$id$ = $edit_skater_sticker_vmenu$
+		:i $FireEvent$$type$ = $focus$$target$ = $edit_skater_sticker_vmenu$
+	:i endif
+:i endfunction
+:i function $edit_skater_exit_sticker_menu$
+	:i if $ScreenElementExists$$id$ = $current_menu_anchor$
+		:i $DestroyScreenElement$$id$ = $current_menu_anchor$
+	:i endif
+	:i $edit_skater_create_options_menu$$options_array$ = $edit_skater_graphics$$cam_pos$ = $general$
+:i endfunction
+:i function $check_ok_pad_left$
+	:i $generic_menu_up_or_down_sound$$params$ = :s{$up$:s}
+:i endfunction
+:i function $check_ok_pad_right$
+	:i $generic_menu_up_or_down_sound$$params$ = :s{$down$:s}
+:i endfunction
+:i function $edit_skater_add_sticker_menu_item$
+	:i $FormatText$$ChecksumName$ = $id$%s(10,"sticker-%a")$a$ = %GLOBAL%$index$
+	:i $CreateScreenElement$:s{
+		:i $parent$ = $current_sticker_hmenu$
+		:i $type$ = $ContainerElement$
+		:i $id$ = %GLOBAL%$id$
+		:i $dims$ = %vec2(68.000000,68.000000)
+		:i $event_handlers$ = :a{
+			:i :s{$focus$$edit_skater_sticker_menu_item_focus$$params$ = :s{$id$ = %GLOBAL%$id$$index$ = %GLOBAL%$hindex$:s}:s}
+			:i :s{$unfocus$$edit_skater_sticker_menu_item_unfocus$$params$ = :s{$id$ = %GLOBAL%$id$:s}:s}
+			:i :s{$pad_choose$$generic_menu_pad_choose_sound$:s}
+			:i :s{$pad_choose$$edit_skater_select_sticker$$params$ = :s{$graphic_index$ = %GLOBAL%$index$$texture$ = %GLOBAL%$texture$$texture_string$ = %GLOBAL%$texture_string$%GLOBAL%$type$:s}:s}
+			:i :s{$pad_start$$null_script$:s}
+			:i :a}
+		:i $just$ = :a{$left$$top$:a}
+	:i :s}
+	:i %GLOBAL%$item_id$ = %GLOBAL%$id$
+	:i %GLOBAL%$heap$ = $FrontEnd$
+	:i $CreateScreenElement$:s{
+		:i $parent$ = %GLOBAL%$item_id$
+		:i $type$ = $SpriteElement$
+		:i $texture$ = $white2$
+		:i $rgba$ = :a{%i(64,00000040);%i(64,00000040);%i(64,00000040);%i(128,00000080):a}
+		:i $scale$ = %vec2(8.500000,8.500000)
+		:i $pos$ = %vec2(0.000000,0.000000)
+		:i $just$ = :a{$left$$top$:a}
+		:i $heap$ = %GLOBAL%$heap$
+	:i :s}
+	:i $CreateScreenElement$:s{
+		:i $parent$ = %GLOBAL%$item_id$
+		:i $type$ = $SpriteElement$
+		:i $texture$ = $white2$
+		:i $rgba$ = :a{%i(32,00000020);%i(32,00000020);%i(32,00000020);%i(128,00000080):a}
+		:i $scale$ = %vec2(7.500000,7.500000)
+		:i $pos$ = %vec2(4.000000,4.000000)
+		:i $just$ = :a{$left$$top$:a}
+		:i $z_priority$ = %i(8,00000008)
+		:i $heap$ = %GLOBAL%$heap$
+	:i :s}
+	:i if  (%GLOBAL%$texture$ = $logo_thugpro$) 
+		:i $scale$ = %f(0.450000)
+	:i endif
+	:i $CreateScreenElement$:s{
+		:i $type$ = $SpriteElement$
+		:i $parent$ = %GLOBAL%$item_id$
+		:i $texture$ = %GLOBAL%$texture$
+		:i $z_priority$ = %i(9,00000009)
+		:i $scale$ = %GLOBAL%$scale$
+		:i $pos$ = %vec2(5.000000,6.000000)
+		:i $just$ = :a{$left$$top$:a}
+		:i $z_priority$ = %i(9,00000009)
+		:i $heap$ = %GLOBAL%$heap$
+	:i :s}
+:i endfunction
+:i function $edit_skater_sticker_menu_focus$
+	:i %GLOBAL%$menu_id$.$GetTags$
+	:i if $GotParam$$tag_selected_index$
+		:i if NOT  (%GLOBAL%$tag_selected_index$ = $skater_sticker_item_menu_selection$) 
+			:i if  (%GLOBAL%$tag_selected_index$ > $skater_sticker_item_menu_selection$) 
+				:i %GLOBAL%$num_pads$ =  (%GLOBAL%$tag_selected_index$ - $skater_sticker_item_menu_selection$) 
+				:i %GLOBAL%$pad_event$ = $pad_left$
+			:i else 
+				:i %GLOBAL%$num_pads$ =  ($skater_sticker_item_menu_selection$ - %GLOBAL%$tag_selected_index$) 
+				:i %GLOBAL%$pad_event$ = $pad_right$
+			:i endif
+			:i $wait$%i(1,00000001)$gameframe$
+			:i $change$$ok_pad_left_right$ = %i(0,00000000)
+			:i while
+				
+				:i $FireEvent$$type$ = %GLOBAL%$pad_event$$target$ = %GLOBAL%$menu_id$
+			:i loop_to %GLOBAL%$num_pads$
+			:i $change$$ok_pad_left_right$ = %i(1,00000001)
+		:i endif
+	:i endif
+:i endfunction
+:i function $edit_skater_sticker_menu_item_focus$
+	:i $SetScreenElementProps$:s{
+		:i $id$ = :s{%GLOBAL%$id$$child$ = %i(0,00000000):s}
+		:i $rgba$ =  ( ($THUGPRO_GlobalThemeInfo$) ->$HIGHLIGHTED_TEXT_COLOR$) 
+	:i :s}
+	:i $change$$skater_sticker_item_menu_selection$ = %GLOBAL%$index$
+:i endfunction
+:i function $edit_skater_sticker_menu_item_unfocus$
+	:i $SetScreenElementProps$:s{
+		:i $id$ = :s{%GLOBAL%$id$$child$ = %i(0,00000000):s}
+		:i $rgba$ = :a{%i(64,00000040);%i(64,00000040);%i(64,00000040);%i(128,00000080):a}
+	:i :s}
+:i endfunction
+:i function $edit_skater_select_sticker$
+	:i $GetCurrentSkaterProfileIndex$
+	:i if $GotParam$$sticker$
+		:i $SetSkaterProfileInfo$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$$params$ = :s{$sticker_texture$ = %GLOBAL%$texture_string$:s}
+		:i $GetSkaterId$$skater$ = %GLOBAL%$CurrentSkaterProfileIndex$
+		:i %GLOBAL%$objid$.$SetStickerTexture$%GLOBAL%$texture_string$
+	:i else 
+		:i if $GotParam$$test$
+			:i $GetCurrentSkaterProfileIndex$
+			:i $SetPlayerFaceTexture$:s{
+				:i $player$ = %GLOBAL%$CurrentSkaterProfileIndex$
+				:i $texture$ = %GLOBAL%$texture_string$
+			:i :s}
+			:i $SetPlayerFacePoints$:s{
+				:i $player$ = %GLOBAL%$CurrentSkaterProfileIndex$
+				:i $left_eye$ = :a{%i(44,0000002c);%i(40,00000028):a}
+				:i $right_eye$ = :a{%i(87,00000057);%i(42,0000002a):a}
+				:i $nose$ = :a{%i(65,00000041);%i(70,00000046):a}
+				:i $lips$ = :a{%i(66,00000042);%i(88,00000058):a}
+				:i $width$ = %i(128,00000080)
+				:i $height$ = %i(128,00000080)
+			:i :s}
+			:i $refresh_skater_model$
+		:i else 
+			:i $SetSkaterProfileInfo$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$$params$ = :s{$tag_texture$ = %GLOBAL%$texture_string$:s}
+			:i $SetSkaterProfileInfo$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$$params$ = :s{$has_custom_tag$ = %i(0,00000000):s}
+			:i $GetSkaterId$$skater$ = %GLOBAL%$CurrentSkaterProfileIndex$
+			:i %GLOBAL%$objid$.$SetGraffitiTexture$%GLOBAL%$texture_string$
+		:i endif
+	:i endif
+	:i $edit_skater_exit_sticker_menu$
+:i endfunction
+:i function $edit_skater_info_menu$
+	:i $helper_text_elements$ = :a{
+		:i :s{$text$ = %s(14,"\b7/\b4=Select"):s}
+		:i :s{$text$ = %s(14,"\b6/\b5=Adjust"):s}
+		:i :s{$text$ = %s(8,"\bn=Back"):s}
+		:i :s{$text$ = %s(10,"\bm=Accept"):s}
+		:i :a}
+	:i $thugpro_menu_create$:s{
+		:i $menu_name$ = $edit_skater_info$
+		:i $menu_title$ = %s(11,"Information")
+		:i $menu_style$ = $MENU_STYLE_RIGHT$
+		:i $helper_text$ = %GLOBAL%$helper_text_elements$
+		:i $pad_back_script$ = $create_edit_skater_menu$
+		:i $pad_back_params$ = :s{:s}
+		:i $show_description_panel$
+		:i $boxed$
+	:i :s}
+	:i $GetCurrentSkaterProfileIndex$
+	:i $GetSkaterProfileInfo$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$
+	:i $info_name$ = %GLOBAL%$display_name$
+	:i $info_town$ = %GLOBAL%$hometown$
+	:i if  (%GLOBAL%$age$ = %i(4294967295,ffffffff)) 
+		:i %GLOBAL%$info_age$ = %s(7,"Unknown")
+	:i else 
+		:i $FormatText$$textname$ = $info_age$%s(2,"%a")$a$ = %GLOBAL%$age$
+	:i endif
+	:i switch %GLOBAL%$is_male$
+		:i case %i(1,00000001)
+			:i $info_sex$ = %s(4,"Male")
+			:i if NOT $GotParam$$voice$
+				:i %GLOBAL%$voice$ = $male1$
+			:i endif
+			:i endcase
+		case %i(0,00000000)
+			:i $info_sex$ = %s(6,"Female")
+			:i if NOT $GotParam$$voice$
+				:i %GLOBAL%$voice$ = $female1$
+			:i endif
+			:i end_switch
+	
+	:i switch %GLOBAL%$stance$
+		:i case $regular$
+			:i $info_stance$ = %s(7,"Regular")
+			:i endcase
+		case $goofy$
+			:i $info_stance$ = %s(5,"Goofy")
+			:i end_switch
+	
+	:i switch %GLOBAL%$pushstyle$
+		:i case $never_mongo$
+			:i $info_push$ = %s(11,"Never Mongo")
+			:i endcase
+		case $mongo_when_switch$
+			:i $info_push$ = %s(12,"Mongo Switch")
+			:i endcase
+		case $always_mongo$
+			:i $info_push$ = %s(12,"Always Mongo")
+			:i end_switch
+	
+	:i switch %GLOBAL%$trickstyle$
+		:i case $vert$
+			:i $info_style$ = %s(4,"Vert")
+			:i endcase
+		case $street$
+			:i $info_style$ = %s(6,"Street")
+			:i end_switch
+	
+	:i if  (%GLOBAL%$is_pro$ = %i(1,00000001)) 
+		:i if  (%GLOBAL%$is_locked$ = %i(1,00000001)) 
+			:i %GLOBAL%$not_focusable$ = $not_focusable$
+		:i endif
+	:i endif
+	:i $edit_skater_set_voice_index$$voice$ = %GLOBAL%$voice$
+	:i $make_thugpro_menu_item$:s{
+		:i $text$ = %sc(4,"Name")
+		:i $id$ = $skater_name_value$
+		:i $pad_choose_script$ = $launch_onscreen_keyboard_from_edit_skater$
+		:i $pad_choose_params$ = :s{$field$ = %s(0,"")$text$ = %GLOBAL%$display_name$$title$ = %sc(4,"NAME")$min_length$ = %i(1,00000001)$max_length$ = %i(15,0000000f)$text_to_change$ = $name$:s}
+		:i $extra_text$ = %GLOBAL%$info_name$
+		:i %GLOBAL%$not_focusable$
+	:i :s}
+	:i if  (%GLOBAL%$is_locked$ = %i(1,00000001)) 
+		:i if NOT $GotParam$$no_bg$
+			:i %GLOBAL%$not_focusable$ = $not_focusable$
+		:i endif
+	:i endif
+	:i $make_thugpro_menu_item$:s{
+		:i $text$ = %sc(8,"Hometown")
+		:i $id$ = $skater_hometown_value$
+		:i $pad_choose_script$ = $launch_onscreen_keyboard_from_edit_skater$
+		:i $pad_choose_params$ = :s{$field$ = %s(0,"")$text$ = %GLOBAL%$hometown$$title$ = %sc(8,"HOMETOWN")$min_length$ = %i(1,00000001)$max_length$ = %i(15,0000000f)$text_to_change$ = $town$:s}
+		:i $extra_text$ = %GLOBAL%$info_town$
+		:i %GLOBAL%$not_focusable$
+	:i :s}
+	:i $make_thugpro_menu_item$:s{
+		:i $text$ = %sc(3,"Age")
+		:i $pad_choose_script$ = $nullscript$$option_arrows$$pad_choose$$option_arrows_callback$ = $edit_skater_info_change$
+		:i $option_arrows_callback_params$ = :s{$change_age$:s}
+		:i $extra_text$ = %GLOBAL%$info_age$
+		:i %GLOBAL%$not_focusable$
+	:i :s}
+	:i $make_thugpro_menu_item$:s{
+		:i $text$ = %sc(3,"Sex")
+		:i $id$ = $skater_sex_value$
+		:i $option_arrows$$pad_choose$$option_arrows_callback$ = $edit_skater_info_change$
+		:i $option_arrows_callback_params$ = :s{$change_is_male$:s}
+		:i $extra_text$ = %GLOBAL%$info_sex$
+		:i %GLOBAL%$not_focusable$
+	:i :s}
+	:i $make_thugpro_menu_item$:s{
+		:i $text$ = %sc(5,"Voice")
+		:i $id$ = $skater_voice_value$
+		:i $pad_choose_script$ = $nullscript$
+		:i $focus_params$ = :s{$play_voice$:s}
+		:i $option_arrows$
+		:i $pad_choose$
+		:i $option_arrows_callback$ = $edit_skater_info_change$
+		:i $option_arrows_callback_params$ = :s{$change_voice$:s}
+		:i $extra_text$ =  ($player_voices$:a{$edit_skater_voice_index$:a}->$frontend_desc$) 
+		:i %GLOBAL%$not_focusable$
+	:i :s}
+	:i $make_thugpro_menu_item$:s{
+		:i $text$ = %sc(6,"Stance")
+		:i $pad_choose_script$ = $nullscript$$option_arrows$$pad_choose$$option_arrows_callback$ = $edit_skater_info_change$
+		:i $option_arrows_callback_params$ = :s{$change_stance$:s}
+		:i $extra_text$ = %GLOBAL%$info_stance$
+		:i %GLOBAL%$not_focusable$
+	:i :s}
+	:i $make_thugpro_menu_item$:s{
+		:i $text$ = %sc(4,"Push")
+		:i $pad_choose_script$ = $nullscript$$option_arrows$$pad_choose$$option_arrows_callback$ = $edit_skater_info_change$
+		:i $option_arrows_callback_params$ = :s{$change_push$:s}
+		:i $extra_text$ = %GLOBAL%$info_push$
+		:i %GLOBAL%$not_focusable$
+	:i :s}
+	:i $make_thugpro_menu_item$:s{
+		:i $text$ = %sc(6,"Tricks")
+		:i $pad_choose_script$ = $nullscript$$option_arrows$$pad_choose$$option_arrows_callback$ = $edit_skater_info_change$
+		:i $option_arrows_callback_params$ = :s{$change_trickstyle$:s}
+		:i $extra_text$ = %GLOBAL%$info_style$
+		:i %GLOBAL%$not_focusable$
+	:i :s}
+	:i $make_thugpro_menu_item$:s{
+		:i $text$ = %sc(6,"\c4CAS Mod v2")
+		:i $not_focusable$
+	:i :s}
+	:i $make_thugpro_menu_item$:s{
+		:i $text$ = %sc(6,"\cbMade by ken")
+		:i $not_focusable$
+	:i :s}
+	:i $make_thugpro_menu_item$:s{
+		:i $text$ = %sc(6,"\c8THPS CIS \c7DOC THPS")
+		:i $not_focusable$
+	:i :s}
+	:i $make_thugpro_menu_item$:s{
+		:i $text$ = %sc(6,"\c530.10.2023")
+		:i $not_focusable$
+	:i :s}
+	:i if $GotParam$$last_item_id$
+		:i $focus_target$ = %GLOBAL%$last_item_id$
+	:i endif
+	:i $thugpro_menu_finalize$ isNull 
+:i endfunction
+:i $edit_skater_voice_index$ = %i(0,00000000)
+:i function $edit_skater_set_voice_index$
+	:i $GetArraySize$$player_voices$
+	:i %GLOBAL%$index$ = %i(0,00000000)
+	:i while
+		
+		:i if $ChecksumEquals$$a$ = %GLOBAL%$voice$$b$ =  ($player_voices$:a{%GLOBAL%$index$:a}->$id$) 
+			:i $change$$edit_skater_voice_index$ = %GLOBAL%$index$
+			:i continue
+			
+		:i endif
+		:i %GLOBAL%$index$ =  (%GLOBAL%$index$ + %i(1,00000001)) 
+	:i loop_to %GLOBAL%$array_size$
+:i endfunction
+:i function $CAS_SFX_PlayVoiceStream$:s{
+		:i $voiceindex$ = %i(0,00000000)
+	:i :s}
+	:i $StopStream$$CAS_SFX_VoiceAuditionStream$
+	:i if NOT $GotParam$$voiceprefix$
+		:i if $StructureContains$$structure$ =  ($player_voices$:a{%GLOBAL%$voiceindex$:a}) $play_skater_stream_name_alt$
+			:i %GLOBAL%$voiceprefix$ =  ($player_voices$:a{%GLOBAL%$voiceindex$:a}->$play_skater_stream_name_alt$) 
+		:i else 
+			:i %GLOBAL%$voiceprefix$ =  ($player_voices$:a{%GLOBAL%$voiceindex$:a}->$play_skater_stream_name$) 
+		:i endif
+	:i endif
+	:i $printf$%s(15,"VOICEINDEX = %v")$v$ = %GLOBAL%$voiceindex$
+	:i $printf$%s(16,"VOICEPREFIX = %v")$v$ = %GLOBAL%$voiceprefix$
+	:i $wait$%i(5,00000005)$gameframes$
+	:i while
+		
+		:i %GLOBAL%$TakeOverNumber$ = select(41,9, 01 00 01 00 01 00 01 00 01 00 01 00 01 00 01 00 01 00) :OFFSET(0):OFFSET(1):OFFSET(2):OFFSET(3):OFFSET(4):OFFSET(5):OFFSET(6):OFFSET(7):OFFSET(8)
+			 :POS(0) %i(1,00000001)
+		:BREAKTO(9)
+			 :POS(1) %i(2,00000002)
+		:BREAKTO(9)
+			 :POS(2) %i(3,00000003)
+		:BREAKTO(9)
+			 :POS(3) %i(4,00000004)
+		:BREAKTO(9)
+			 :POS(4) %i(5,00000005)
+		:BREAKTO(9)
+			 :POS(5) %i(6,00000006)
+		:BREAKTO(9)
+			 :POS(6) %i(7,00000007)
+		:BREAKTO(9)
+			 :POS(7) %i(8,00000008)
+		:BREAKTO(9)
+			 :POS(8) %i(9,00000009) :POS(9) 
+			:i $FormatText$$ChecksumName$ = $VoiceAuditionStream$%s(14,"%t_TakeOver0%n")$t$ = %GLOBAL%$voiceprefix$$n$ = %GLOBAL%$TakeOverNumber$
+			:i if NOT $StreamExists$%GLOBAL%$VoiceAuditionStream$
+				:i $printf$%s(48,"Stream doesn't exist...going to look for another")
+			:i else 
+				:i continue
+				
+			:i endif
+			:i $wait$%f(0.001000)$seconds$
+		:i loop_to %i(9,00000009)
+		:i if NOT $StreamExists$%GLOBAL%$VoiceAuditionStream$
+			:i $printf$%s(30,"Stream REALLY doesn't exist...")
+			:i $FormatText$$ChecksumName$ = $VoiceAuditionStream$%s(12,"%t_ssintro01")$t$ = %GLOBAL%$voiceprefix$
+		:i endif
+		:i if NOT $StreamExists$%GLOBAL%$VoiceAuditionStream$
+			:i $printf$%s(37,"Stream REALLY REALLY doesn't exist...")
+			:i $FormatText$$ChecksumName$ = $VoiceAuditionStream$%s(12,"%t_tantrum01")$t$ = %GLOBAL%$voiceprefix$
+		:i endif
+		:i $PlayStream$%GLOBAL%$VoiceAuditionStream$$vol$ = %i(200,000000c8)$priority$ = $StreamPriorityHigh$$id$ = $CAS_SFX_VoiceAuditionStream$
+	:i endfunction
+	:i function $launch_onscreen_keyboard_from_edit_skater$
+		:i $GetCurrentSkaterProfileIndex$
+		:i $GetSkaterProfileInfo$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$
+		:i if $ScreenElementExists$$id$ = $current_menu$
+			:i $DestroyScreenElement$$id$ = $current_menu$
+		:i endif
+		:i if $ScreenElementExists$$id$ = $current_menu_anchor$
+			:i $DestroyScreenElement$$id$ = $current_menu_anchor$
+		:i endif
+		:i if $ScreenElementExists$$id$ = $bg_container$
+			:i $DestroyScreenElement$$id$ = $bg_container$
+		:i endif
+		:i $wait$%i(1,00000001)$frame$
+		:i $create_onscreen_keyboard$:s{
+			:i $text$ = %GLOBAL%$text$
+			:i $keyboard_title$ = %GLOBAL%$title$
+			:i $min_length$ = %GLOBAL%$min_length$
+			:i $max_length$ = %GLOBAL%$max_length$
+			:i $text_to_change$ = %GLOBAL%$text_to_change$
+			:i $keyboard_done_script$ = $exit_onscreen_keyboard_from_edit_skater$
+			:i $keyboard_cancel_script$ = $exit_onscreen_keyboard_from_edit_skater$
+			:i $allow_cancel$
+		:i :s}
+	:i endfunction
+	:i function $exit_onscreen_keyboard_from_edit_skater$
+		:i $GetTextElementString$$id$ = $keyboard_current_string$
+		:i $GetCurrentSkaterProfileIndex$
+		:i switch %GLOBAL%$text_to_change$
+			:i case $name$
+				:i %GLOBAL%$last_item_id$ = $skater_name_value$
+				:i $SetSkaterProfileInfo$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$$params$ = :s{$display_name$ = %GLOBAL%$string$:s}
+				:i $check_for_neversoft_skaters$$name$ = %GLOBAL%$string$
+				:i endcase
+			case $town$
+				:i %GLOBAL%$last_item_id$ = $skater_hometown_value$
+				:i $SetSkaterProfileInfo$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$$params$ = :s{$hometown$ = %GLOBAL%$string$:s}
+				:i end_switch
+		
+		:i $destroy_onscreen_keyboard$
+		:i $edit_skater_info_menu$$last_item_id$ = %GLOBAL%$last_item_id$
+	:i endfunction
+	:i function $check_for_neversoft_skaters$
+	:i endfunction
+	:i $skater_info_change_dialog_wait$ = %i(0,00000000)
+	:i function $thugpro_edit_skater_info_change_dialog$
+		:i if $ScreenElementExists$$id$ = $current_menu_anchor$
+			:i $DestroyScreenElement$$id$ = $current_menu_anchor$
+		:i endif
+		:i if $ScreenElementExists$$id$ = $edit_skater_options_vmenu$
+			:i $DestroyScreenElement$$id$ = $edit_skater_options_vmenu$
+		:i endif
+		:i if $ScreenElementExists$$id$ = $current_menu$
+			:i $DestroyScreenElement$$id$ = $current_menu$
+		:i endif
+		:i $create_snazzy_dialog_box$:s{
+			:i $title$ = %s(8,"WARNING!")
+			:i $text$ = %s(65,"You will lose all unsaved changes to your skater.\n Are you sure?")
+			:i $buttons$ = :a{
+				:i :s{
+					:i $text$ = %sc(3,"Yes")
+					:i $pad_choose_script$ = $thugpro_edit_skater_info_change_dialog_yes$
+				:i :s}
+				:i :s{
+					:i $text$ = %sc(2,"No")
+					:i $pad_choose_script$ = $thugpro_edit_skater_info_change_dialog_no$
+				:i :s}
+				:i :a}
+		:i :s}
+	:i endfunction
+	:i function $thugpro_edit_skater_info_change_dialog_yes$
+		:i $dialog_box_exit$
+		:i $change$$skater_info_change_dialog_wait$ = %i(1,00000001)
+		:i $edit_skater_info_menu$$last_item_id$ = $skater_sex_value$
+	:i endfunction
+	:i function $thugpro_edit_skater_info_change_dialog_no$
+		:i $dialog_box_exit$
+		:i $change$$skater_info_change_dialog_wait$ = %i(2,00000002)
+		:i $edit_skater_info_menu$$last_item_id$ = $skater_sex_value$
+	:i endfunction
+	:i function $edit_skater_info_change$
+		:i $GetCurrentSkaterProfileIndex$
+		:i $GetSkaterProfileInfo$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$
+		:i $GetTags$
+		:i if $GotParam$$change_age$
+			:i if $GotParam$$left$
+				:i if NOT  (%GLOBAL%$age$ > %i(1,00000001)) 
+					:i return
+					
+				:i endif
+				:i $age$ =  (%GLOBAL%$age$ - %i(1,00000001)) 
+			:i else 
+				:i if NOT  (%i(99,00000063) > %GLOBAL%$age$) 
+					:i return
+					
+				:i endif
+				:i $age$ =  (%GLOBAL%$age$ + %i(1,00000001)) 
+			:i endif
+			:i $FormatText$$textname$ = $info_age$%s(2,"%a")$a$ = %GLOBAL%$age$
+			:i $SetSkaterProfileInfo$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$$params$ = :s{$age$ = %GLOBAL%$age$:s}
+			:i $thugpro_menu_item_update_extra_text$:s{$id$ = %GLOBAL%$id$$text$ = %GLOBAL%$info_age$:s}
+		:i endif
+		:i if $GotParam$$change_is_male$
+			:i $change$$skater_info_change_dialog_wait$ = %i(0,00000000)
+			:i $thugpro_edit_skater_info_change_dialog$
+			:i $thugpro_wait$$ReadyVal$ = $skater_info_change_dialog_wait$
+			:i if $IntegerEquals$$a$ =  ($skater_info_change_dialog_wait$) $b$ = %i(2,00000002)
+				:i return
+				
+			:i endif
+			:i $change$$skater_info_change_dialog_wait$ = %i(0,00000000)
+			:i switch %GLOBAL%$is_male$
+				:i case %i(0,00000000)
+					:i $cas_apply_skater_sex$$apply_male$ = %i(1,00000001)
+					:i $thugpro_menu_item_update_extra_text$:s{$id$ = %GLOBAL%$id$$text$ = %s(4,"Male"):s}
+					:i endcase
+				case %i(1,00000001)
+					:i $cas_apply_skater_sex$$apply_male$ = %i(0,00000000)
+					:i $thugpro_menu_item_update_extra_text$:s{$id$ = %GLOBAL%$id$$text$ = %s(6,"Female"):s}
+					:i end_switch
+			
+			:i %GLOBAL%$index$ = %i(0,00000000)
+			:i $GetArraySize$$player_voices$
+			:i while
+				
+				:i if NOT  (%GLOBAL%$is_male$ =  ($player_voices$:a{%GLOBAL%$index$:a}->$is_male$) ) 
+					:i $SetSkaterProfileInfo$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$$params$ = :s{$voice$ =  ($player_voices$:a{%GLOBAL%$index$:a}->$id$) :s}
+					:i $thugpro_menu_item_update_extra_text$:s{$id$ = $skater_voice_value$$text$ =  ($player_voices$:a{%GLOBAL%$index$:a}->$frontend_desc$) :s}
+					:i $change$$edit_skater_voice_index$ = %GLOBAL%$index$
+					:i continue
+					
+				:i endif
+				:i %GLOBAL%$index$ =  (%GLOBAL%$index$ + %i(1,00000001)) 
+			:i loop_to %GLOBAL%$array_size$
+			:i $RefreshSkaterModel$$profile$ = %GLOBAL%$CurrentSkaterProfileIndex$$skater$ = %i(0,00000000)$no_board$ = $no_board$
+		:i endif
+		:i if $GotParam$$change_stance$
+			:i switch %GLOBAL%$stance$
+				:i case $regular$
+					:i $SetSkaterProfileInfo$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$$params$ = :s{$stance$ = $goofy$:s}
+					:i $RefreshSkaterModel$$skater$ = %i(0,00000000)$profile$ = %GLOBAL%$CurrentSkaterProfileIndex$$no_board$ = $no_board$
+					:i $thugpro_menu_item_update_extra_text$:s{$id$ = %GLOBAL%$id$$text$ = %s(5,"Goofy"):s}
+					:i endcase
+				case $goofy$
+					:i $SetSkaterProfileInfo$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$$params$ = :s{$stance$ = $regular$:s}
+					:i $RefreshSkaterModel$$skater$ = %i(0,00000000)$profile$ = %GLOBAL%$CurrentSkaterProfileIndex$$no_board$ = $no_board$
+					:i $thugpro_menu_item_update_extra_text$:s{$id$ = %GLOBAL%$id$$text$ = %s(7,"Regular"):s}
+					:i end_switch
+			
+		:i endif
+		:i if $GotParam$$change_trickstyle$
+			:i switch %GLOBAL%$trickstyle$
+				:i case $street$
+					:i $SetSkaterProfileInfo$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$$params$ = :s{$trickstyle$ = $vert$:s}
+					:i $thugpro_menu_item_update_extra_text$:s{$id$ = %GLOBAL%$id$$text$ = %s(4,"Vert"):s}
+					:i endcase
+				case $vert$
+					:i $SetSkaterProfileInfo$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$$params$ = :s{$trickstyle$ = $street$:s}
+					:i $thugpro_menu_item_update_extra_text$:s{$id$ = %GLOBAL%$id$$text$ = %s(6,"Street"):s}
+					:i end_switch
+			
+		:i endif
+		:i if $GotParam$$change_push$
+			:i if $GotParam$$left$
+				:i switch %GLOBAL%$pushstyle$
+					:i case $mongo_when_switch$
+						:i $SetSkaterProfileInfo$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$$params$ = :s{$pushstyle$ = $never_mongo$:s}
+						:i $thugpro_menu_item_update_extra_text$:s{$id$ = %GLOBAL%$id$$text$ = %s(11,"Never Mongo"):s}
+						:i endcase
+					case $never_mongo$
+						:i $SetSkaterProfileInfo$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$$params$ = :s{$pushstyle$ = $always_mongo$:s}
+						:i $thugpro_menu_item_update_extra_text$:s{$id$ = %GLOBAL%$id$$text$ = %s(12,"Always Mongo"):s}
+						:i endcase
+					case $always_mongo$
+						:i $SetSkaterProfileInfo$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$$params$ = :s{$pushstyle$ = $mongo_when_switch$:s}
+						:i $thugpro_menu_item_update_extra_text$:s{$id$ = %GLOBAL%$id$$text$ = %s(12,"Mongo Switch"):s}
+						:i end_switch
+				
+			:i else 
+				:i switch %GLOBAL%$pushstyle$
+					:i case $mongo_when_switch$
+						:i $SetSkaterProfileInfo$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$$params$ = :s{$pushstyle$ = $always_mongo$:s}
+						:i $thugpro_menu_item_update_extra_text$:s{$id$ = %GLOBAL%$id$$text$ = %s(12,"Always Mongo"):s}
+						:i endcase
+					case $never_mongo$
+						:i $SetSkaterProfileInfo$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$$params$ = :s{$pushstyle$ = $mongo_when_switch$:s}
+						:i $thugpro_menu_item_update_extra_text$:s{$id$ = %GLOBAL%$id$$text$ = %s(12,"Mongo Switch"):s}
+						:i endcase
+					case $always_mongo$
+						:i $SetSkaterProfileInfo$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$$params$ = :s{$pushstyle$ = $never_mongo$:s}
+						:i $thugpro_menu_item_update_extra_text$:s{$id$ = %GLOBAL%$id$$text$ = %s(11,"Never Mongo"):s}
+						:i end_switch
+				
+			:i endif
+			:i $RefreshSkaterModel$$skater$ = %i(0,00000000)$profile$ = %GLOBAL%$CurrentSkaterProfileIndex$$no_board$ = $no_board$
+		:i endif
+		:i if $GotParam$$change_voice$
+			:i %GLOBAL%$voice_index$ = $edit_skater_voice_index$
+			:i $GetArraySize$$player_voices$
+			:i while
+				
+				:i if $GotParam$$left$
+					:i %GLOBAL%$voice_index$ =  (%GLOBAL%$voice_index$ - %i(1,00000001)) 
+					:i if  (%GLOBAL%$voice_index$ < %i(0,00000000)) 
+						:i %GLOBAL%$voice_index$ =  (%GLOBAL%$array_size$ - %i(1,00000001)) 
+					:i endif
+				:i else 
+					:i %GLOBAL%$voice_index$ =  (%GLOBAL%$voice_index$ + %i(1,00000001)) 
+					:i if  (%GLOBAL%$voice_index$ = %GLOBAL%$array_size$) 
+						:i %GLOBAL%$voice_index$ = %i(0,00000000)
+					:i endif
+				:i endif
+				:i if  (%GLOBAL%$is_male$ =  ($player_voices$:a{%GLOBAL%$voice_index$:a}->$is_male$) ) 
+					:i continue
+					
+				:i endif
+			:i loop_to 
+			:i $change$$edit_skater_voice_index$ = %GLOBAL%$voice_index$
+			:i $SetSkaterProfileInfo$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$$params$ = :s{$voice$ =  ($player_voices$:a{%GLOBAL%$voice_index$:a}->$id$) :s}
+			:i $thugpro_menu_item_update_extra_text$:s{$id$ = %GLOBAL%$id$$text$ =  ($player_voices$:a{%GLOBAL%$voice_index$:a}->$frontend_desc$) :s}
+			:i $printf$%s(11,"VOICE = %v ")$v$ = %GLOBAL%$voice_index$
+			:i $CAS_SFX_PlayVoiceStream$:s{
+				:i $voiceindex$ = %GLOBAL%$voice_index$
+			:i :s}
+		:i endif
+		:i $skater$.$TurnOffSpecialItem$
+	:i endfunction
+	:i function $confirm_skater_sexchange$
+		:i $perform_skater_sexchange$ isNull 
+		:i return
+		
+		:i if $ScreenElementExists$$id$ = $current_menu$
+			:i $DestroyScreenElement$$id$ = $current_menu$
+		:i endif
+		:i if $ScreenElementExists$$id$ = $current_menu_anchor$
+			:i $DestroyScreenElement$$id$ = $current_menu_anchor$
+		:i endif
+		:i if $ScreenElementExists$$id$ = $bg_container$
+			:i $DestroyScreenElement$$id$ = $bg_container$
+		:i endif
+		:i $create_error_box$:s{
+			:i $title$ = %s(8,"WARNING!")
+			:i $text$ = %s(71,"Changing the sex of your skater will erase any changes.\n Are you sure?")
+			:i $text_dims$ = %vec2(400.000000,0.000000)
+			:i $bg_scale$ = %f(1.200000)
+			:i $buttons$ = :a{
+				:i :s{$text$ = %s(3,"Yes")$pad_choose_script$ = $perform_skater_sexchange$$pad_choose_params$ = :s{ isNull :s}:s}
+				:i :s{$text$ = %s(2,"No")$pad_choose_script$ = $cancel_skater_sexchange$:s}
+				:i :a}
+		:i :s}
+	:i endfunction
+	:i function $cancel_skater_sexchange$
+		:i $edit_skater_info_menu$
+	:i endfunction
+	:i function $perform_skater_sexchange$
+		:i $edit_skater_info_menu$
+		:i $FireEvent$$type$ = $unfocus$$target$ = $edit_skater_info_vmenu$
+		:i $FireEvent$$type$ = $focus$$target$ = $edit_skater_info_vmenu$$data$ = :s{$child_id$ = $skater_sex_value$:s}
+		:i $GetCurrentSkaterProfileIndex$
+		:i $GetSkaterProfileInfo$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$
+		:i switch %GLOBAL%$is_male$
+			:i case %i(0,00000000)
+				:i $cas_apply_skater_sex$$apply_male$ = %i(1,00000001)
+				:i $thugpro_menu_item_update_extra_text$:s{$id$ = $skater_sex_value$$text$ = %s(4,"Male"):s}
+				:i endcase
+			case %i(1,00000001)
+				:i $cas_apply_skater_sex$$apply_male$ = %i(0,00000000)
+				:i $thugpro_menu_item_update_extra_text$:s{$id$ = $skater_sex_value$$text$ = %s(6,"Female"):s}
+				:i end_switch
+		
+		:i %GLOBAL%$index$ = %i(0,00000000)
+		:i $GetArraySize$$player_voices$
+		:i while
+			
+			:i if NOT  (%GLOBAL%$is_male$ =  ($player_voices$:a{%GLOBAL%$index$:a}->$is_male$) ) 
+				:i $SetSkaterProfileInfo$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$$params$ = :s{$voice$ =  ($player_voices$:a{%GLOBAL%$index$:a}->$id$) :s}
+				:i $thugpro_menu_item_update_extra_text$:s{$id$ = %GLOBAL%$id$$text$ =  ($player_voices$:a{%GLOBAL%$index$:a}->$frontend_desc$) :s}
+				:i $change$$edit_skater_voice_index$ = %GLOBAL%$index$
+				:i continue
+				
+			:i endif
+			:i %GLOBAL%$index$ =  (%GLOBAL%$index$ + %i(1,00000001)) 
+		:i loop_to %GLOBAL%$array_size$
+		:i $GetCurrentSkaterProfileIndex$
+		:i $RefreshSkaterModel$$profile$ = %GLOBAL%$CurrentSkaterProfileIndex$$skater$ = %i(0,00000000)$no_board$ = $no_board$
+		:i $skater$.$TurnOffSpecialItem$
+		:i $FireEvent$$type$ = $focus$$target$ = $skater_voice_value$
+		:i $FireEvent$$type$ = $unfocus$$target$ = $skater_voice_value$
+		:i $FireEvent$$type$ = $focus$$target$ = $skater_sex_value$
+	:i endfunction
+	:i function $cas_apply_skater_sex$$apply_male$ = %i(1,00000001)
+		:i $GetCurrentSkaterProfileIndex$
+		:i $GetSkaterProfileInfo$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$
+		:i if  (%GLOBAL%$is_male$ = %i(1,00000001)) 
+			:i %GLOBAL%$success$ = %i(1,00000001)
+		:i else 
+			:i %GLOBAL%$success$ = %i(0,00000000)
+		:i endif
+		:i if  (%GLOBAL%$success$ = %GLOBAL%$apply_male$) 
+			:i $printf$%s(8,"Same sex")
+		:i else 
+			:i if  (%GLOBAL%$apply_male$ = %i(1,00000001)) 
+				:i $SetPlayerAppearance$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$$appearance_structure$ = $appearance_custom_skater_male_06$
+				:i $SetSkaterProfileProperty$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$$is_male$%i(1,00000001)
+			:i else 
+				:i $SetPlayerAppearance$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$$appearance_structure$ = $appearance_custom_skater_female$
+				:i $SetSkaterProfileProperty$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$$is_male$%i(0,00000000)
+			:i endif
+			:i $RefreshSkaterModel$$skater$ = %i(0,00000000)$profile$ = %GLOBAL%$CurrentSkaterProfileIndex$$no_board$ = $no_board$
+			:i $skater$.$TurnOffSpecialItem$
+		:i endif
+	:i endfunction
+	:i function $edit_graphic_apply_graphic_from_save$
+	:i endfunction
+	:i function $cas_post_load$
+	:i endfunction
+	:i function $cas_skater_left$
+		:i while
+			
+			:i if $ControllerPressed$$black$
+				:i $skater$.$Obj_RotY$$Speed$ = %i(240,000000f0)$angle$ = %i(4294967290,fffffffa)
+			:i else 
+				:i continue
+				
+			:i endif
+			:i $wait$%i(1,00000001)$gameframes$
+		:i loop_to 
+	:i endfunction
+	:i function $cas_skater_right$
+		:i while
+			
+			:i if $ControllerPressed$$white$
+				:i $skater$.$Obj_RotY$$Speed$ = %i(240,000000f0)$angle$ = %i(6,00000006)
+			:i else 
+				:i continue
+				
+			:i endif
+			:i $wait$%i(1,00000001)$gameframes$
+		:i loop_to 
+	:i endfunction
+	:i $default_face_points$ = :a{
+		:i :s{$name$ = %s(28,"the center of your right eye")$pos$ = %vec2(42.000000,51.000000):s}
+		:i :s{$name$ = %s(27,"the center of your left eye")$pos$ = %vec2(80.000000,51.000000):s}
+		:i :s{$name$ = %s(30,"the spot between your nostrils")$pos$ = %vec2(61.000000,77.000000):s}
+		:i :s{$name$ = %s(23,"the center of your lips")$pos$ = %vec2(61.000000,97.000000):s}
+		:i :a}
+	:i $tony_face_points$ = :a{
+		:i %vec2(43.000000,42.000000)
+		:i %vec2(83.000000,44.000000)
+		:i %vec2(62.000000,72.000000)
+		:i %vec2(62.000000,88.000000)
+		:i :a}
+	:i $saved_face_points$ = :a{
+		:i %vec2(42.000000,51.000000)
+		:i %vec2(80.000000,51.000000)
+		:i %vec2(61.000000,77.000000)
+		:i %vec2(61.000000,97.000000)
+		:i :a}
+	:i $goto_face_menu$ = %i(0,00000000)
+	:i function $load_face_overlay_texture$
+		:i $get_default_face_texture_name$
+		:i $LoadTexture$%GLOBAL%$overlayPath$
+		:i $SetFaceMassageTextureOverlay$%GLOBAL%$overlayName$
+	:i endfunction
+	:i function $unload_face_overlay_texture$
+		:i $get_default_face_texture_name$
+		:i $UnloadTexture$%GLOBAL%$overlayPath$
+	:i endfunction
+	:i function $clear_face_texture_from_profile$
+		:i $GetCurrentSkaterProfileIndex$
+		:i $ClearPlayerFaceTexture$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$
+		:i $RefreshSkaterModel$$skater$ = %i(0,00000000)$profile$ = %GLOBAL%$CurrentSkaterProfileIndex$$no_board$ = $no_board$
+	:i endfunction
+	:i function $use_default_face_texture$
+		:i $GetCurrentSkaterProfileIndex$
+		:i $get_default_face_texture_name$
+		:i $SetPlayerFaceTexture$:s{
+			:i $player$ = %GLOBAL%$CurrentSkaterProfileIndex$
+			:i $texture$ = %GLOBAL%$texturePath$
+		:i :s}
+		:i $SetPlayerFacePoints$:s{
+			:i $player$ = %GLOBAL%$CurrentSkaterProfileIndex$
+			:i $left_eye$ = :a{%i(44,0000002c);%i(40,00000028):a}
+			:i $right_eye$ = :a{%i(87,00000057);%i(42,0000002a):a}
+			:i $nose$ = :a{%i(65,00000041);%i(70,00000046):a}
+			:i $lips$ = :a{%i(66,00000042);%i(88,00000058):a}
+			:i $width$ = %i(128,00000080)
+			:i $height$ = %i(128,00000080)
+		:i :s}
+		:i $SetPlayerFaceOverlayTexture$:s{
+			:i $player$ = %GLOBAL%$CurrentSkaterProfileIndex$
+			:i $texture$ = %GLOBAL%$overlayPath$
+		:i :s}
+		:i $RefreshSkaterModel$$skater$ = %i(0,00000000)$profile$ = %GLOBAL%$CurrentSkaterProfileIndex$$no_board$ = $no_board$
+	:i endfunction
+	:i function $download_face$
+		:i $ChooseFaceForFacemap$ isNull 
+		:i $done_download_face$
+	:i endfunction
+	:i function $done_download_face$
+		:i if NOT $GotParam$$new_menu_script$
+			:i $unload_cas_texture_from_profile$
+			:i $create_face_map_menu$$focus_target$ = $face_map_menu_choose_face$$downloaded_face$ = $downloaded_face$$cam_pos$ = $head$
+		:i else 
+			:i %GLOBAL%$new_menu_script$ isNull 
+			:i $create_face_map_menu$$downloaded_face$ = $downloaded_face$$cam_pos$ = $head$
+		:i endif
+	:i endfunction
+	:i function $unload_cas_texture_from_profile$
+		:i $printf$%s(30,"Unloading current face texture")
+		:i $UnloadTexture$$cas_texture_from_profile$
+	:i endfunction
+	:i function $launch_face_menu$
+		:i if NOT $GotParam$$no_library$
+			:i %GLOBAL%$load_library$ = $load_library$
+		:i endif
+		:i $create_face_map_menu$$downloaded_face$ = %GLOBAL%$downloaded_face$$goto_face_map$ = %GLOBAL%$goto_face_map$$load_library$ = %GLOBAL%$load_library$
+	:i endfunction
+	:i function $create_face_map_menu$
+		:i $printf$%s(27,"script create_face_map_menu")
+		:i $thugpro_menu_create$:s{
+			:i $menu_name$ = $face_mapping_options$
+			:i $menu_title$ = %s(12,"Face Mapping")
+			:i $menu_style$ = $MENU_STYLE_RIGHT$
+			:i $helper_text$ = $generic_helper_text_cas$
+			:i $pad_back_script$ = $face_map_exit$
+			:i $pad_back_params$ = :s{$new_menu_script$ = $face_map_return_to_cas$:s}
+			:i $boxed$
+		:i :s}
+		:i $SetScreenElementProps$:s{
+			:i $id$ = $current_menu$
+			:i $event_handlers$ = :a{
+				:i :s{$pad_alt$$cas_skater_left$$params$ = :s{:s}:s}
+				:i :s{$pad_alt2$$cas_skater_right$$params$ = :s{:s}:s}
+				:i :a}
+			:i $replace_handlers$
+		:i :s}
+		:i $SpawnSkaterScript$$SkateshopCasIdle$$params$ = :s{$cam_pos$ = %GLOBAL%$cam_pos$:s}
+		:i $change$$goto_face_menu$ = %i(0,00000000)
+		:i $GetCurrentSkaterProfileIndex$
+		:i if NOT  (%GLOBAL%$CurrentSkaterProfileIndex$ = %i(0,00000000)) 
+			:i $load_pro_skater$$name$ = $custom$
+		:i endif
+		:i if NOT $GotParam$$face_texture$
+			:i if $GotParam$$downloaded_face$
+				:i $refresh_skater_model$
+			:i endif
+		:i endif
+		:i if NOT $GotParam$$no_textures$
+			:i if NOT $GotParam$$no_new_textures$
+				:i $LoadFaceTextureFromProfile$$checksum$ = $cas_texture_from_profile$
+			:i endif
+		:i endif
+		:i if $GotParam$$goto_face_map$
+			:i $face_map_menu$
+			:i return
+			
+		:i endif
+		:i $make_thugpro_menu_item$:s{
+			:i $text$ = %s(11,"Choose Face")
+			:i $id$ = $face_map_menu_choose_face$
+			:i $pad_choose_script$ = $retrieve_face_selected$
+		:i :s}
+		:i if $PlayerFaceIsValid$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$
+			:i %GLOBAL%$focusable$ = $focusable$
+		:i else 
+			:i %GLOBAL%$focusable$ = $not_focusable$
+		:i endif
+		:i $make_thugpro_menu_item$:s{
+			:i $text$ = %s(11,"Edit Points")
+			:i $id$ = $face_map_menu_edit_points$
+			:i $pad_choose_script$ = $face_map_exit$
+			:i $pad_choose_params$ = :s{$new_menu_script$ = $face_map_menu$:s}
+			:i %GLOBAL%$focusable$
+		:i :s}
+		:i $make_thugpro_menu_item$:s{
+			:i $text$ = %s(15,"Match Your Face")
+			:i $id$ = $face_map_menu_match_face$
+			:i $pad_choose_script$ = $face_map_exit$
+			:i $pad_choose_params$ = :s{$new_menu_script$ = $face_hsv_menu$$on_load$ = $on_load$$hue$ = %f(0.000000)$sat$ = %f(1.000000)$val$ = %f(1.000000):s}
+			:i %GLOBAL%$focusable$
+		:i :s}
+		:i $make_thugpro_menu_item$:s{
+			:i $text$ = %s(15,"Color Your Skin")
+			:i $id$ = $face_map_menu_color_face$
+			:i $pad_choose_script$ = $face_map_exit$
+			:i $pad_choose_params$ = :s{$new_menu_script$ = $face_skin_menu$$on_load$ = $on_load$$cam_pos$ = $head$:s}
+			:i %GLOBAL%$focusable$
+		:i :s}
+		:i $thugpro_menu_finalize$ isNull 
+	:i endfunction
+	:i function $face_map_exit$
+		:i $StopEyeToyCheck$
+		:i %GLOBAL%$new_menu_script$ isNull 
+	:i endfunction
+	:i function $face_map_return_to_cas$
+		:i $unload_cas_texture_from_profile$
+		:i $SetNetworkMode$
+		:i $create_edit_skater_menu$
+	:i endfunction
+	:i function $new_add_item_to_face_menu$
+		:i $FormatText$$textname$ = $txt$%s(23,"-name: %n  , file: %f  ")$n$ = %GLOBAL%$name$$f$ = %GLOBAL%$file$
+		:i $printf$%GLOBAL%$txt$
+		:i $make_thugpro_menu_item$:s{
+			:i $text$ = %GLOBAL%$name$
+			:i $pad_choose_script$ = $download_face$
+			:i $pad_choose_params$ = :s{$string$ = %GLOBAL%$file$:s}
+		:i :s}
+	:i endfunction
+	:i function $retrieve_face_selected$
+		:i $thugpro_menu_create$:s{
+			:i $menu_name$ = $face_mapping_face_selected$
+			:i $menu_title$ = %s(11,"Choose Face")
+			:i $menu_style$ = $MENU_STYLE_RIGHT$
+			:i $helper_text$ = $generic_helper_text_cas$
+			:i $pad_back_script$ = $done_download_face$
+			:i $scrolling$
+			:i $boxed$
+		:i :s}
+		:i $SetScreenElementProps$:s{
+			:i $id$ = $current_menu$
+			:i $event_handlers$ = :a{
+				:i :s{$pad_alt$$cas_skater_left$$params$ = :s{:s}:s}
+				:i :s{$pad_alt2$$cas_skater_right$$params$ = :s{:s}:s}
+				:i :a}
+		:i :s}
+		:i $make_thugpro_menu_item$:s{
+			:i $text$ = %s(4,"None")
+			:i $id$ = $face_mapping_face_selected_none$
+			:i $pad_choose_script$ = $done_download_face$
+			:i $pad_choose_params$ = :s{$new_menu_script$ = $clear_face_texture_from_profile$:s}
+		:i :s}
+		:i $make_thugpro_menu_item$:s{
+			:i $text$ = %s(7,"Default")
+			:i $id$ = $face_mapping_face_selected_default$
+			:i $pad_choose_script$ = $done_download_face$
+			:i $pad_choose_params$ = :s{$new_menu_script$ = $use_default_face_texture$:s}
+		:i :s}
+		:i $THUGPRO_AddFacesToMenu$$AddItemScript$ = $new_add_item_to_face_menu$
+		:i $thugpro_menu_create_remainder_items$
+		:i $thugpro_menu_finalize$ isNull 
+	:i endfunction
+	:i function $face_hsv_menu$:s{
+			:i $hue$ = %f(2.460000)
+			:i $sat$ = %f(0.900000)
+			:i $val$ = %f(0.870000)
+			:i $left_eye$ = :a{%i(44,0000002c);%i(40,00000028):a}
+			:i $right_eye$ = :a{%i(87,00000057);%i(42,0000002a):a}
+			:i $nose$ = :a{%i(65,00000041);%i(70,00000046):a}
+			:i $lips$ = :a{%i(66,00000042);%i(88,00000058):a}
+		:i :s}
+		:i $thugpro_menu_create$:s{
+			:i $menu_name$ = $match_face_color$
+			:i $menu_title$ = %s(16,"MATCH FACE COLOR")
+			:i $menu_style$ = $MENU_STYLE_RIGHT$
+			:i $pad_back_script$ = $exit_face_hsv$
+			:i $pad_back_params$ = :s{$no_textures$ = $no_textures$:s}
+			:i $helper_text$ = $generic_helper_text_up_down_adjust$
+			:i $show_description_panel$
+			:i $wide_extra_text$
+			:i $boxed$
+		:i :s}
+		:i $thugpro_menu_desc_text_focus$:s{
+			:i $text$ = %s(78,"Adjust your face color so that it blends seamlessly with the surrounding skin.")
+		:i :s}
+		:i $load_face_overlay_texture$
+		:i $get_default_face_texture_name$
+		:i $SetModelFaceTexturePoints$$face_points$ = $original_model_face_points$
+		:i $CopyTexture$$src$ = $cas_texture_from_profile$$new$ = $dummy2$
+		:i $Generate32BitImage$$dummy2$$renderable$ = %i(1,00000001)$store_original$ = %i(1,00000001)
+		:i $value$ =  ($saved_face_points$:a{%i(0,00000000):a}->%vec2(1.000000,0.000000)) 
+		:i $CastToInteger$$value$
+		:i $SetArrayElement$$arrayname$ = $left_eye$$index$ = %i(0,00000000)$newvalue$ = %GLOBAL%$value$
+		:i $value$ =  ($saved_face_points$:a{%i(0,00000000):a}->%vec2(0.000000,1.000000)) 
+		:i $CastToInteger$$value$
+		:i $SetArrayElement$$arrayname$ = $left_eye$$index$ = %i(1,00000001)$newvalue$ = %GLOBAL%$value$
+		:i $value$ =  ($saved_face_points$:a{%i(1,00000001):a}->%vec2(1.000000,0.000000)) 
+		:i $CastToInteger$$value$
+		:i $SetArrayElement$$arrayname$ = $right_eye$$index$ = %i(0,00000000)$newvalue$ = %GLOBAL%$value$
+		:i $value$ =  ($saved_face_points$:a{%i(1,00000001):a}->%vec2(0.000000,1.000000)) 
+		:i $CastToInteger$$value$
+		:i $SetArrayElement$$arrayname$ = $right_eye$$index$ = %i(1,00000001)$newvalue$ = %GLOBAL%$value$
+		:i $value$ =  ($saved_face_points$:a{%i(2,00000002):a}->%vec2(1.000000,0.000000)) 
+		:i $CastToInteger$$value$
+		:i $SetArrayElement$$arrayname$ = $nose$$index$ = %i(0,00000000)$newvalue$ = %GLOBAL%$value$
+		:i $value$ =  ($saved_face_points$:a{%i(2,00000002):a}->%vec2(0.000000,1.000000)) 
+		:i $CastToInteger$$value$
+		:i $SetArrayElement$$arrayname$ = $nose$$index$ = %i(1,00000001)$newvalue$ = %GLOBAL%$value$
+		:i $value$ =  ($saved_face_points$:a{%i(3,00000003):a}->%vec2(1.000000,0.000000)) 
+		:i $CastToInteger$$value$
+		:i $SetArrayElement$$arrayname$ = $lips$$index$ = %i(0,00000000)$newvalue$ = %GLOBAL%$value$
+		:i $value$ =  ($saved_face_points$:a{%i(3,00000003):a}->%vec2(0.000000,1.000000)) 
+		:i $CastToInteger$$value$
+		:i $SetArrayElement$$arrayname$ = $lips$$index$ = %i(1,00000001)$newvalue$ = %GLOBAL%$value$
+		:i $AdjustFaceTextureToModel$:s{
+			:i $texture$ = $dummy2$
+			:i $face_points$ = :s{
+				:i $left_eye$ = %GLOBAL%$left_eye$
+				:i $right_eye$ = %GLOBAL%$right_eye$
+				:i $nose$ = %GLOBAL%$nose$
+				:i $lips$ = %GLOBAL%$lips$
+				:i $width$ = %i(128,00000080)
+				:i $height$ = %i(128,00000080)
+			:i :s}
+		:i :s}
+		:i $GetCurrentSkaterProfileIndex$
+		:i $current_face_points$ = :s{$h$ = %GLOBAL%$hue$$s$ = %GLOBAL%$sat$$v$ = %GLOBAL%$val$:s}
+		:i $GetPlayerFacePoints$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$
+		:i %GLOBAL%$hue$ =  (%GLOBAL%$current_face_points$->$h$) 
+		:i %GLOBAL%$sat$ =  (%GLOBAL%$current_face_points$->$s$) 
+		:i %GLOBAL%$val$ =  (%GLOBAL%$current_face_points$->$v$) 
+		:i $AdjustTextureHSV$$dummy2$$h$ = %GLOBAL%$hue$$s$ = %GLOBAL%$sat$$v$ = %GLOBAL%$val$
+		:i $CreateScreenElement$:s{
+			:i $type$ = $SpriteElement$
+			:i $parent$ = $current_menu_anchor$
+			:i $texture$ = $white2$
+			:i $pos$ = %vec2(92.000000,127.000000)
+			:i $scale$ = %i(29,0000001d)
+			:i $just$ = :a{$left$$top$:a}
+			:i $rgba$ = :a{%i(30,0000001e)%i(30,0000001e)%i(30,0000001e)%i(128,00000080):a}
+			:i $z_priority$ = %i(5,00000005)
+		:i :s}
+		:i $CreateScreenElement$:s{
+			:i $type$ = $SpriteElement$
+			:i $parent$ = %GLOBAL%$id$
+			:i $id$ = $temp_preview_overlay$
+			:i $just$ = :a{$left$$top$:a}
+			:i $pos$ = %vec2(0.150000,0.080000)
+			:i $scale$ = %vec2(0.060000,0.061000)
+			:i $texture$ = %GLOBAL%$overlayName$
+			:i $rgba$ = :a{%i(128,00000080)%i(128,00000080)%i(128,00000080)%i(128,00000080):a}
+			:i $z_priority$ = %i(10,0000000a)
+		:i :s}
+		:i $CreateScreenElement$:s{
+			:i $type$ = $SpriteElement$
+			:i $parent$ = %GLOBAL%$id$
+			:i $id$ = $temp_preview$
+			:i $just$ = :a{$left$$top$:a}
+			:i $pos$ = %vec2(22.000000,27.000000)
+			:i $scale$ = %vec2(0.700000,0.700000)
+			:i $texture$ = $dummy2$
+			:i $rgba$ = :a{%i(128,00000080)%i(128,00000080)%i(128,00000080)%i(128,00000080):a}
+			:i $z_priority$ = %i(9,00000009)
+		:i :s}
+		:i $thugpro_face_color_menu_add_options_to_menu$
+		:i $thugpro_menu_finalize$ isNull 
+		:i if  (%GLOBAL%$hue$ < %f(181.000000)) 
+			:i %GLOBAL%$hue$ =  (%f(180.000000) +  (%GLOBAL%$hue$ * %f(18.000000)) ) 
+		:i else 
+			:i %GLOBAL%$hue$ =  ( (%GLOBAL%$hue$%i(4294966946,fffffea2))  * %f(18.000000)) 
+		:i endif
+		:i $hue_anchor$.$SetTags$$value$ = %GLOBAL%$hue$
+		:i $saturation_anchor$.$SetTags$$value$ = %GLOBAL%$sat$
+		:i $value_anchor$.$SetTags$$value$ = %GLOBAL%$val$
+		:i $__thugpro_face_color_menu_refresh$ isNull 
+	:i endfunction
+	:i function $reset_face_hsv$
+	:i endfunction
+	:i function $face_hsv_focus$
+	:i endfunction
+	:i function $face_hsv_unfocus$
+	:i endfunction
+	:i function $exit_face_hsv$
+		:i if $ObjectExists$$id$ = $temp_preview$
+			:i $DestroyScreenElement$$id$ = $temp_preview$
+		:i endif
+		:i if $ObjectExists$$id$ = $temp_preview_overlay$
+			:i $DestroyScreenElement$$id$ = $temp_preview_overlay$
+		:i endif
+		:i $hue_anchor$.$GetSingleTag$$value$
+		:i %GLOBAL%$current_hue$ = %GLOBAL%$value$
+		:i if  (%GLOBAL%$current_hue$ < %f(181.000000)) 
+			:i %GLOBAL%$current_hue$ =  (%f(350.000000) +  (%GLOBAL%$current_hue$ / %f(18.000000)) ) 
+		:i else 
+			:i %GLOBAL%$current_hue$ =  ( (%GLOBAL%$current_hue$%f(-180.000000))  / %f(18.000000)) 
+		:i endif
+		:i $saturation_anchor$.$GetSingleTag$$value$
+		:i %GLOBAL%$current_sat$ = %GLOBAL%$value$
+		:i $value_anchor$.$GetSingleTag$$value$
+		:i %GLOBAL%$current_val$ = %GLOBAL%$value$
+		:i $unload_face_overlay_texture$
+		:i $printf$%s(23,"Unloading dummy texture")
+		:i $UnloadTexture$%s(6,"dummy2")
+		:i $GetCurrentSkaterProfileIndex$
+		:i $GetPlayerFacePoints$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$
+		:i $current_face_points$ = :s{%GLOBAL%$current_face_points$$h$ = %GLOBAL%$current_hue$$s$ = %GLOBAL%$current_sat$$v$ = %GLOBAL%$current_val$:s}
+		:i $SetPlayerFacePoints$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$$face_points$ = %GLOBAL%$current_face_points$
+		:i $RefreshSkaterModel$$skater$ = %i(0,00000000)$profile$ = %GLOBAL%$CurrentSkaterProfileIndex$$no_board$ = $no_board$
+		:i $create_face_map_menu$ isNull $focus_target$ = $face_map_menu_match_face$$cam_pos$ = $head$
+	:i endfunction
+	:i function $face_hsv_increase$
+	:i endfunction
+	:i function $face_hsv_decrease$
+	:i endfunction
+	:i function $face_skin_menu$
+		:i $create_part_cas_color_menu$:s{
+			:i $title$ = %s(10,"Skin Color")
+			:i $parts$ = :a{$skater_m_head$$skater_f_head$:a}
+			:i $callback$ = $exit_face_skin$
+			:i $helper_text$ = $generic_helper_text_color_menu$
+		:i :s}
+	:i endfunction
+	:i function $exit_face_skin$
+		:i $create_face_map_menu$ isNull $focus_target$ = $face_map_menu_color_face$$cam_pos$ = $head$
+	:i endfunction
+	:i function $face_map_menu$
+		:i $printf$%s(20,"script face_map_menu")
+		:i if $ScreenElementExists$$id$ = $current_menu$
+			:i $DestroyScreenElement$$id$ = $current_menu$
+		:i endif
+		:i if $ScreenElementExists$$id$ = $current_menu_anchor$
+			:i $DestroyScreenElement$$id$ = $current_menu_anchor$
+		:i endif
+		:i if $ScreenElementExists$$id$ = $bg_container$
+			:i $DestroyScreenElement$$id$ = $bg_container$
+		:i endif
+		:i $SetScreenElementLock$$id$ = $root_window$$off$
+		:i $CreateScreenElement$:s{
+			:i $type$ = $ContainerElement$
+			:i $parent$ = $root_window$
+			:i $id$ = $face_map_menu_anchor$
+			:i $dims$ = %vec2(640.000000,480.000000)
+			:i $pos$ = %vec2(320.000000,240.000000)
+		:i :s}
+		:i $AssignAlias$$id$ = $face_map_menu_anchor$$alias$ = $current_menu_anchor$
+		:i $create_helper_text$$generic_helper_text_up_down_left_right$
+		:i $SetScreenElementProps$:s{
+			:i $id$ = $current_menu_anchor$
+			:i $event_handlers$ = :a{
+				:i :s{$pad_back$$generic_menu_pad_back$$params$ = :s{$callback$ = $cancel_face_map$:s}:s}
+				:i :a}
+		:i :s}
+		:i $CreateScreenElement$:s{
+			:i $type$ = $ContainerElement$
+			:i $parent$ = $current_menu_anchor$
+			:i $id$ = $face_anchor$
+			:i $pos$ = %vec2(45.000000,95.000000)
+			:i $dims$ = %vec2(256.000000,256.000000)
+			:i $just$ = :a{$left$$top$:a}
+		:i :s}
+		:i $CreateScreenElement$:s{
+			:i $type$ = $textElement$
+			:i $parent$ = $face_anchor$
+			:i $text$ = %s(9,"Your Face")
+			:i $pos$ = %vec2(128.000000,5.000000)
+			:i $font$ = $small$
+			:i $scale$ = %f(1.500000)
+			:i $rgba$ =  ( ($THUGPRO_GlobalThemeInfo$) ->$HIGHLIGHTED_TEXT_COLOR$) 
+			:i $z_priority$ = %i(5,00000005)
+			:i $just$ = :a{$center$$center$:a}
+		:i :s}
+		:i $CreateScreenElement$:s{
+			:i $type$ = $SpriteElement$
+			:i $parent$ = $face_anchor$
+			:i $pos$ = %vec2(128.000000,8.000000)
+			:i $texture$ = $myf_frame$
+			:i $just$ = :a{$center$$center$:a}
+			:i $scale$ = %vec2(2.100000,1.000000)
+			:i $z_priority$ = %i(4,00000004)
+		:i :s}
+		:i $CreateScreenElement$:s{
+			:i $type$ = $SpriteElement$
+			:i $parent$ = $face_anchor$
+			:i $id$ = $your_face$
+			:i $pos$ = %vec2(0.000000,0.000000)
+			:i $texture$ = $cas_texture_from_profile$
+			:i $just$ = :a{$left$$top$:a}
+			:i $scale$ = %i(2,00000002)
+		:i :s}
+		:i $CreateScreenElement$:s{
+			:i $type$ = $SpriteElement$
+			:i $parent$ = $face_anchor$
+			:i $pos$ = %vec2(128.000000,242.000000)
+			:i $texture$ = $myf_frame$
+			:i $just$ = :a{$center$$center$:a}
+			:i $scale$ = %vec2(2.100000,1.000000)
+			:i $z_priority$ = %i(4,00000004)
+			:i $rot_angle$ = %i(180,000000b4)
+		:i :s}
+		:i $CreateScreenElement$:s{
+			:i $type$ = $SpriteElement$
+			:i $parent$ = $face_anchor$
+			:i $id$ = $point_arrow$
+			:i $texture$ = $myf_crosshair$
+			:i $pos$ = %vec2(85.000000,130.000000)
+			:i $alpha$ = %i(0,00000000)
+			:i $z_priority$ = %i(900,00000384)
+			:i $just$ = :a{$center$$center$:a}
+			:i $rgba$ =  ( ($THUGPRO_GlobalThemeInfo$) ->$ALT_COLOR$) 
+		:i :s}
+		:i $CreateScreenElement$:s{
+			:i $type$ = $ContainerElement$
+			:i $parent$ = $current_menu_anchor$
+			:i $id$ = $tony_face_anchor$
+			:i $pos$ = %vec2(341.000000,95.000000)
+			:i $dims$ = %vec2(256.000000,256.000000)
+			:i $just$ = :a{$left$$top$:a}
+		:i :s}
+		:i $CreateScreenElement$:s{
+			:i $type$ = $textElement$
+			:i $parent$ = $tony_face_anchor$
+			:i $text$ = %s(7,"Example")
+			:i $pos$ = %vec2(128.000000,5.000000)
+			:i $font$ = $small$
+			:i $scale$ = %f(1.500000)
+			:i $rgba$ =  ( ($THUGPRO_GlobalThemeInfo$) ->$UNHIGHLIGHTED_TEXT_COLOR$) 
+			:i $z_priority$ = %i(5,00000005)
+			:i $just$ = :a{$center$$center$:a}
+		:i :s}
+		:i $CreateScreenElement$:s{
+			:i $type$ = $SpriteElement$
+			:i $parent$ = $tony_face_anchor$
+			:i $pos$ = %vec2(128.000000,8.000000)
+			:i $texture$ = $myf_frame$
+			:i $just$ = :a{$center$$center$:a}
+			:i $scale$ = %vec2(2.100000,1.000000)
+			:i $z_priority$ = %i(4,00000004)
+		:i :s}
+		:i $CreateScreenElement$:s{
+			:i $type$ = $SpriteElement$
+			:i $parent$ = $tony_face_anchor$
+			:i $pos$ = %vec2(0.000000,0.000000)
+			:i $texture$ = $myf_example$
+			:i $just$ = :a{$left$$top$:a}
+			:i $scale$ = %i(2,00000002)
+		:i :s}
+		:i $CreateScreenElement$:s{
+			:i $type$ = $SpriteElement$
+			:i $parent$ = $tony_face_anchor$
+			:i $pos$ = %vec2(128.000000,242.000000)
+			:i $texture$ = $myf_frame$
+			:i $just$ = :a{$center$$center$:a}
+			:i $scale$ = %vec2(2.100000,1.000000)
+			:i $z_priority$ = %i(4,00000004)
+			:i $rot_angle$ = %i(180,000000b4)
+		:i :s}
+		:i $CreateScreenElement$:s{
+			:i $type$ = $SpriteElement$
+			:i $parent$ = $tony_face_anchor$
+			:i $id$ = $tony_arrow$
+			:i $texture$ = $myf_crosshair$
+			:i $pos$ = %vec2(85.000000,130.000000)
+			:i $alpha$ = %i(0,00000000)
+			:i $z_priority$ = %i(900,00000384)
+			:i $just$ = :a{$center$$center$:a}
+			:i $rgba$ = :a{%i(100,00000064)%i(0,00000000)%i(0,00000000)%i(128,00000080):a}
+			:i $scale$ = %f(1.400000)
+		:i :s}
+		:i $CreateScreenElement$:s{
+			:i $type$ = $textElement$
+			:i $parent$ = $current_menu_anchor$
+			:i $id$ = $directions_text$
+			:i $font$ = $small$
+			:i $text$ = %s(0,"")
+			:i $scale$ = %f(0.500000)
+			:i $alpha$ = %f(0.900000)
+			:i $pos$ = %vec2(320.000000,407.000000)
+			:i $line_spacing$ = %f(0.650000)
+			:i $just$ = :a{$center$$center$:a}
+			:i $internal_just$ = :a{$center$$center$:a}
+			:i $z_priority$ = %i(1020,000003fc)
+		:i :s}
+		:i $CreateScreenElement$:s{
+			:i $type$ = $SpriteElement$
+			:i $parent$ = $current_menu_anchor$
+			:i $texture$ = $white$
+			:i $alpha$ = %f(0.820000)
+			:i $pos$ = %vec2(320.000000,416.000000)
+			:i $just$ = :a{$center$$bottom$:a}
+			:i $rgba$ = :a{%i(0,00000000)%i(0,00000000)%i(0,00000000)%i(128,00000080):a}
+			:i $scale$ = %vec2(200.500000,5.000000)
+		:i :s}
+		:i $FireEvent$$type$ = $focus$$target$ = $current_menu_anchor$
+		:i $KillSpawnedScript$$name$ = $get_face_points$
+		:i $spawnscript$$get_face_points$
+	:i endfunction
+	:i function $cancel_face_map$
+		:i $KillSpawnedScript$$name$ = $get_face_points$
+		:i $create_face_map_menu$$no_textures$$focus_target$ = $face_map_menu_edit_points$$cam_pos$ = $head$
+	:i endfunction
+	:i function $get_face_points$$scale$ = %i(2,00000002)
+		:i $left_eye$ = :a{%i(0,00000000)%i(0,00000000):a}
+		:i $right_eye$ = :a{%i(0,00000000)%i(0,00000000):a}
+		:i $nose$ = :a{%i(0,00000000)%i(0,00000000):a}
+		:i $lips$ = :a{%i(0,00000000)%i(0,00000000):a}
+		:i $GetArraySize$$default_face_points$
+		:i $DoScreenElementMorph$$id$ = $point_arrow$$alpha$ = %i(1,00000001)
+		:i $DoScreenElementMorph$$id$ = $tony_arrow$$alpha$ = %i(1,00000001)
+		:i $RunScriptOnScreenElement$$id$ = $point_arrow$$blink_tony_face_arrow$
+		:i if  ($face_map_points_saved$ = %i(1,00000001)) 
+			:i $create_saved_face_points$$highlight_rgba$ =  ( ($THUGPRO_GlobalThemeInfo$) ->$HIGHLIGHTED_TEXT_COLOR$) 
+		:i endif
+		:i $index$ = %i(0,00000000)
+		:i while
+			
+			:i if  ($face_map_points_saved$ = %i(0,00000000)) 
+				:i $pos$ =  ( ($default_face_points$:a{%GLOBAL%$index$:a}->$pos$)  * %GLOBAL%$scale$) 
+			:i else 
+				:i $FormatText$$ChecksumName$ = $point_id$%s(7,"point%i")$i$ = %GLOBAL%$index$
+				:i if $ScreenElementExists$$id$ = %GLOBAL%$point_id$
+					:i $DestroyScreenElement$$id$ = %GLOBAL%$point_id$
+				:i endif
+				:i $pos$ =  ( ($saved_face_points$:a{%GLOBAL%$index$:a})  * %GLOBAL%$scale$) 
+			:i endif
+			:i $tony_pos$ =  ( ($tony_face_points$:a{%GLOBAL%$index$:a})  * %GLOBAL%$scale$) 
+			:i $DoScreenElementMorph$$id$ = $point_arrow$$pos$ = %GLOBAL%$pos$
+			:i $DoScreenElementMorph$$id$ = $tony_arrow$$pos$ = %GLOBAL%$tony_pos$
+			:i $RunScriptOnScreenElement$$adjust_face_point$$id$ = $point_arrow$$params$ = :s{$pos$ = %GLOBAL%$pos$:s}
+			:i if  ( ($GLOBAL_CtrlLayout$ = %i(1,00000001))  OR  ($GLOBAL_CtrlLayout$ = %i(2,00000002)) ) 
+				:i $button_text$ = %s(3,"\m0")
+			:i else 
+				:i $button_text$ = %s(3,"\bm")
+			:i endif
+			:i $FormatText$$textname$ = $directions$%s(51,"Select %i using the left analog stick and press %b.")$i$ =  ($default_face_points$:a{%GLOBAL%$index$:a}->$name$) $b$ = %GLOBAL%$button_text$
+			:i $SetScreenElementProps$$id$ = $directions_text$$text$ = %GLOBAL%$directions$
+			:i $WaitForEvent$$type$ = $pad_choose$
+			:i $KillSpawnedScript$$name$ = $adjust_face_point$
+			:i $GetScreenElementPosition$$id$ = $point_arrow$
+			:i $face_x$ =  ( (%GLOBAL%$ScreenElementPos$->%vec2(1.000000,0.000000) + %i(16,00000010))  *  (%f(1.000000) / %GLOBAL%$scale$) ) 
+			:i $face_y$ =  ( (%GLOBAL%$ScreenElementPos$->%vec2(0.000000,1.000000) + %i(16,00000010))  *  (%f(1.000000) / %GLOBAL%$scale$) ) 
+			:i $CastToInteger$$face_x$
+			:i $CastToInteger$$face_y$
+			:i $new_pos$ =  (%vec2(1.000000,0.000000) * %GLOBAL%$face_x$ + %vec2(0.000000,1.000000) * %GLOBAL%$face_y$) 
+			:i switch %GLOBAL%$index$
+				:i case %i(0,00000000)
+					:i $SetArrayElement$$arrayname$ = $left_eye$$index$ = %i(0,00000000)$newvalue$ = %GLOBAL%$face_x$
+					:i $SetArrayElement$$arrayname$ = $left_eye$$index$ = %i(1,00000001)$newvalue$ = %GLOBAL%$face_y$
+					:i endcase
+				case %i(1,00000001)
+					:i $SetArrayElement$$arrayname$ = $right_eye$$index$ = %i(0,00000000)$newvalue$ = %GLOBAL%$face_x$
+					:i $SetArrayElement$$arrayname$ = $right_eye$$index$ = %i(1,00000001)$newvalue$ = %GLOBAL%$face_y$
+					:i endcase
+				case %i(2,00000002)
+					:i $SetArrayElement$$arrayname$ = $nose$$index$ = %i(0,00000000)$newvalue$ = %GLOBAL%$face_x$
+					:i $SetArrayElement$$arrayname$ = $nose$$index$ = %i(1,00000001)$newvalue$ = %GLOBAL%$face_y$
+					:i endcase
+				case %i(3,00000003)
+					:i $SetArrayElement$$arrayname$ = $lips$$index$ = %i(0,00000000)$newvalue$ = %GLOBAL%$face_x$
+					:i $SetArrayElement$$arrayname$ = $lips$$index$ = %i(1,00000001)$newvalue$ = %GLOBAL%$face_y$
+					:i end_switch
+			
+			:i $saved_face_points2$ = $saved_face_points$
+			:i $SetArrayElement$$arrayname$ = $saved_face_points2$$index$ = %GLOBAL%$index$$newvalue$ = %GLOBAL%$new_pos$
+			:i $FormatText$$ChecksumName$ = $point_id$%s(7,"point%i")$i$ = %GLOBAL%$index$
+			:i if NOT $ScreenElementExists$$id$ = %GLOBAL%$point_id$
+				:i $SetScreenElementLock$$off$$id$ = $face_anchor$
+				:i $CreateScreenElement$:s{
+					:i $type$ = $SpriteElement$
+					:i $parent$ = $face_anchor$
+					:i $id$ = %GLOBAL%$point_id$
+					:i $texture$ = $myf_dot$
+					:i $pos$ =  (%GLOBAL%$new_pos$ * %i(2,00000002)) 
+					:i $z_priority$ = %i(800,00000320)
+					:i $just$ = :a{$center$$center$:a}
+					:i $rgba$ =  ( ($THUGPRO_GlobalThemeInfo$) ->$HIGHLIGHTED_TEXT_COLOR$) 
+					:i $scale$ = %i(2,00000002)
+				:i :s}
+			:i else 
+				:i $printf$%s(25,"This should never happen.")
+			:i endif
+			:i $index$ =  (%GLOBAL%$index$ + %i(1,00000001)) 
+			:i if  (%GLOBAL%$index$ = %GLOBAL%$array_size$) 
+				:i continue
+				
+			:i endif
+		:i loop_to 
+		:i $change$$face_map_points_saved$ = %i(1,00000001)
+		:i $SetScreenElementProps$$id$ = $directions_text$$text$ = %s(19,"Mapping Face Now...")
+		:i $DoScreenElementMorph$$id$ = $point_arrow$$alpha$ = %i(0,00000000)
+		:i $wait$%i(2,00000002)$gameframe$
+		:i $current_face_points$ = :s{$h$ = %f(2.460000)$s$ = %f(0.900000)$v$ = %f(0.870000):s}
+		:i $GetCurrentSkaterProfileIndex$
+		:i $GetPlayerFacePoints$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$
+		:i $SetPlayerFacePoints$:s{
+			:i $player$ = %GLOBAL%$CurrentSkaterProfileIndex$
+			:i $left_eye$ = %GLOBAL%$left_eye$
+			:i $right_eye$ = %GLOBAL%$right_eye$
+			:i $nose$ = %GLOBAL%$nose$
+			:i $lips$ = %GLOBAL%$lips$
+			:i $width$ = %i(128,00000080)
+			:i $height$ = %i(128,00000080)
+			:i $h$ =  (%GLOBAL%$current_face_points$->$h$) 
+			:i $s$ =  (%GLOBAL%$current_face_points$->$s$) 
+			:i $v$ =  (%GLOBAL%$current_face_points$->$v$) 
+		:i :s}
+		:i $GetCurrentSkaterProfileIndex$
+		:i $RefreshSkaterModel$$skater$ = %i(0,00000000)$profile$ = %GLOBAL%$CurrentSkaterProfileIndex$$no_board$ = $no_board$
+		:i $create_face_map_menu$$no_new_textures$$focus_target$ = $face_map_menu_edit_points$$cam_pos$ = $head$
+	:i endfunction
+	:i function $blink_tony_face_arrow$
+		:i while
+			
+			:i $DoMorph$$alpha$ = %i(1,00000001)
+			:i $wait$%f(0.300000)$seconds$
+			:i $DoMorph$$alpha$ = %f(0.600000)$time$ = %f(0.300000)
+		:i loop_to 
+	:i endfunction
+	:i function $adjust_face_point$$pos$ = %vec2(320.000000,240.000000)
+		:i $controller$ = %i(0,00000000)
+		:i $got_controller$ = %i(0,00000000)
+		:i while
+			
+			:i if $ControllerBoundToSkater$$controller$ = %GLOBAL%$controller$$skater$ = %i(0,00000000)
+				:i $got_controller$ = %i(1,00000001)
+				:i continue
+				
+			:i endif
+			:i $controller$ =  (%GLOBAL%$controller$ + %i(1,00000001)) 
+		:i loop_to %i(4,00000004)
+		:i if  ($got_controller$ = %i(0,00000000)) 
+			:i return
+			
+		:i endif
+		:i while
+			
+			:i $GetAnalogueInfo$$controller$ = %GLOBAL%$controller$
+			:i $new_pos$ =  (%GLOBAL%$pos$ +  (%GLOBAL%$leftx$ * %vec2(1.000000,0.000000) + %GLOBAL%$lefty$ * %vec2(0.000000,1.000000)) ) 
+			:i if  (%i(0,00000000) > %GLOBAL%$pos$->%vec2(1.000000,0.000000)) 
+				:i if  (%i(0,00000000) > %GLOBAL%$leftx$) 
+					:i $new_pos$ =  (%GLOBAL%$new_pos$ -  (%GLOBAL%$leftx$ * %vec2(2.000000,0.000000)) ) 
+				:i endif
+			:i else 
+				:i if  (%GLOBAL%$pos$->%vec2(1.000000,0.000000) > %i(254,000000fe)) 
+					:i if  (%GLOBAL%$leftx$ > %i(0,00000000)) 
+						:i $new_pos$ =  (%GLOBAL%$new_pos$ -  (%GLOBAL%$leftx$ * %vec2(2.000000,0.000000)) ) 
+					:i endif
+				:i endif
+			:i endif
+			:i if  (%i(0,00000000) > %GLOBAL%$pos$->%vec2(0.000000,1.000000)) 
+				:i if  (%i(0,00000000) > %GLOBAL%$lefty$) 
+					:i $new_pos$ =  (%GLOBAL%$new_pos$ -  (%GLOBAL%$lefty$ * %vec2(0.000000,2.000000)) ) 
+				:i endif
+			:i else 
+				:i if  (%GLOBAL%$pos$->%vec2(0.000000,1.000000) > %i(254,000000fe)) 
+					:i if  (%GLOBAL%$lefty$ > %i(0,00000000)) 
+						:i $new_pos$ =  (%GLOBAL%$new_pos$ -  (%GLOBAL%$lefty$ * %vec2(0.000000,2.000000)) ) 
+					:i endif
+				:i endif
+			:i endif
+			:i $DoMorph$$pos$ = %GLOBAL%$new_pos$
+			:i $pos$ = %GLOBAL%$new_pos$
+			:i $wait$%i(2,00000002)$gameframe$
+		:i loop_to 
+	:i endfunction
+	:i function $create_saved_face_points$$scale$ = %i(2,00000002)
+		:i $index$ = %i(1,00000001)
+		:i $SetScreenElementLock$$off$$id$ = $face_anchor$
+		:i while
+			
+			:i $FormatText$$ChecksumName$ = $point_id$%s(7,"point%i")$i$ = %GLOBAL%$index$
+			:i $pos$ =  ( ($saved_face_points$:a{%GLOBAL%$index$:a})  * %GLOBAL%$scale$) 
+			:i $CreateScreenElement$:s{
+				:i $type$ = $SpriteElement$
+				:i $parent$ = $face_anchor$
+				:i $id$ = %GLOBAL%$point_id$
+				:i $texture$ = $myf_dot$
+				:i $pos$ = %GLOBAL%$pos$
+				:i $z_priority$ = %i(800,00000320)
+				:i $just$ = :a{$center$$center$:a}
+				:i $rgba$ = %GLOBAL%$highlight_rgba$
+				:i $scale$ = %i(2,00000002)
+			:i :s}
+			:i $index$ =  (%GLOBAL%$index$ + %i(1,00000001)) 
+		:i loop_to %i(3,00000003)
+	:i endfunction
+	:i function $get_default_face_texture_name$
+		:i $GetCurrentSkaterProfileIndex$
+		:i $GetSkaterSex$$player$ = %GLOBAL%$CurrentSkaterProfileIndex$
+		:i if  (%GLOBAL%$is_male$) 
+			:i %GLOBAL%$head_part$ = $skater_m_head$
+			:i %GLOBAL%$texturePath$ = %s(31,"faces\CS_NSN_facemap_male_light")
+			:i %GLOBAL%$overlayPath$ = %s(27,"faces\CS_NSN_Head_gry_alpha")
+			:i %GLOBAL%$overlayName$ = $CS_NSN_Head_gry_alpha$
+		:i else 
+			:i %GLOBAL%$head_part$ = $skater_f_head$
+			:i %GLOBAL%$texturePath$ = %s(33,"faces\CS_NSN_facemap_female_light")
+			:i %GLOBAL%$overlayPath$ = %s(29,"faces\CS_NSN_Head_f_gry_alpha")
+			:i %GLOBAL%$overlayName$ = $CS_NSN_Head_f_gry_alpha$
+		:i endif
+		:i %GLOBAL%$hue$ = %f(2.460000)
+		:i %GLOBAL%$sat$ = %f(0.900000)
+		:i %GLOBAL%$val$ = %f(0.870000)
+		:i return
+		$texturePath$ = %GLOBAL%$texturePath$$overlayPath$ = %GLOBAL%$overlayPath$$overlayName$ = %GLOBAL%$overlayName$$hue$ = %GLOBAL%$hue$$sat$ = %GLOBAL%$sat$$val$ = %GLOBAL%$val$
+	:i endfunction
+	:i function $maybe_load_default_face$
+	:i endfunction
+	:i :end
+	
